@@ -1,0 +1,114 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #12122a;
+  color: #e0e0e0;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.workspace {
+  display: flex;
+  height: 100%;
+  gap: 0;
+}
+
+.panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.left-panel {
+  flex: 1;
+}
+
+.right-panel {
+  flex: 1;
+}
+
+.panel-divider {
+  width: 12px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  position: relative;
+}
+
+.panel-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 40px;
+  background: #2d2d4a;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.panel-divider:hover::after {
+  background: #7c5cbf;
+}
+
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 20px;
+  background: #1a1a2e;
+  border-top: 1px solid #2d2d4a;
+  font-size: 11px;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.footer-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: background 0.3s;
+}
+
+.status-dot.idle {
+  background: #4ade80;
+}
+
+.status-dot.active {
+  background: #fbbf24;
+  animation: pulse 1s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Diseno responsivo */
+@media (max-width: 900px) {
+  .workspace {
+    flex-direction: column;
+  }
+
+  .panel-divider {
+    width: 100%;
+    height: 12px;
+    cursor: row-resize;
+  }
+
+  .panel-divider::after {
+    width: 40px;
+    height: 4px;
+  }
+}

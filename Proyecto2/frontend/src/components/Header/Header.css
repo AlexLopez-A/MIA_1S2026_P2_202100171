@@ -1,0 +1,74 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 56px;
+  background: #1a1a2e;
+  border-bottom: 1px solid #2d2d4a;
+  flex-shrink: 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo {
+  color: #7c5cbf;
+  display: flex;
+  align-items: center;
+}
+
+.header-title h1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.header-subtitle {
+  font-size: 11px;
+  color: #888;
+  letter-spacing: 0.5px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(124, 92, 191, 0.15);
+  color: #b8a5d6;
+  border: 1px solid rgba(124, 92, 191, 0.3);
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.header-btn:hover {
+  background: rgba(124, 92, 191, 0.25);
+  color: #d4c4f0;
+  border-color: rgba(124, 92, 191, 0.5);
+}
+
+.header-btn-secondary {
+  background: rgba(79, 195, 247, 0.14);
+  color: #8fd8f8;
+  border-color: rgba(79, 195, 247, 0.28);
+}
+
+.header-btn-secondary:hover {
+  background: rgba(79, 195, 247, 0.22);
+  color: #c4ecff;
+  border-color: rgba(79, 195, 247, 0.5);
+}

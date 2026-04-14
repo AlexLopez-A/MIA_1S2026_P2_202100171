@@ -4,6 +4,7 @@
 #include "structures.h"
 #include "parser.h"
 #include "utils.h"
+#include "mount_manager.h"
 #include <string>
 #include <cstdio>
 #include <cstring>
@@ -53,6 +54,13 @@ inline std::string cmd_mkdisk(const std::map<std::string, std::string>& params) 
 
     // Crear directorios padre
     createParentDirs(path);
+
+    // Eliminar particiones montadas previas para este disco
+    auto& mounted = getMountedList();
+    mounted.erase(std::remove_if(mounted.begin(), mounted.end(),
+        [&path](const MountedPart& m) { return std::string(m.path) == path; }),
+        mounted.end());
+    getDiskPartCount()[path] = 0;
 
     // Verificar si el archivo ya existe
     if (fileExists(path))
@@ -191,6 +199,7 @@ inline std::string cmd_fdisk(const std::map<std::string, std::string>& params) {
             return "ERROR fdisk: Se requiere -name para eliminar partición.";
 
         std::string name = params.at("name");
+        std::string delType = toLower(params.at("delete"));
 
         FILE* file = fopen(path.c_str(), "rb+");
         if (!file) return "ERROR fdisk: No se pudo abrir el disco.";
@@ -202,12 +211,25 @@ inline std::string cmd_fdisk(const std::map<std::string, std::string>& params) {
         for (int i = 0; i < 4; i++) {
             if (mbr.mbr_partitions[i].part_status == '1' &&
                 std::string(mbr.mbr_partitions[i].part_name) == name) {
+                
+                int pStart = mbr.mbr_partitions[i].part_start;
+                int pSize = mbr.mbr_partitions[i].part_size;
+                
                 mbr.mbr_partitions[i].part_status = '0';
                 mbr.mbr_partitions[i].part_size = 0;
                 fseek(file, 0, SEEK_SET);
                 fwrite(&mbr, sizeof(MBR), 1, file);
+                
+                if (delType == "full") {
+                    char zero = '\0';
+                    fseek(file, pStart, SEEK_SET);
+                    for (int j = 0; j < pSize; j++) {
+                        fwrite(&zero, 1, 1, file);
+                    }
+                }
+                
                 fclose(file);
-                return "Partición '" + name + "' eliminada exitosamente.";
+                return "Partición '" + name + "' eliminada exitosamente (" + delType + ").";
             }
         }
 
@@ -221,12 +243,24 @@ inline std::string cmd_fdisk(const std::map<std::string, std::string>& params) {
                     fseek(file, ebrPos, SEEK_SET);
                     fread(&ebr, sizeof(EBR), 1, file);
                     if (ebr.part_mount == '1' && std::string(ebr.part_name) == name) {
+                        int pStart = ebr.part_start;
+                        int pSize = ebr.part_size;
+                        
                         ebr.part_mount = '0';
                         ebr.part_size = 0;
                         fseek(file, ebrPos, SEEK_SET);
                         fwrite(&ebr, sizeof(EBR), 1, file);
+                        
+                        if (delType == "full") {
+                            char zero = '\0';
+                            fseek(file, pStart, SEEK_SET);
+                            for (int j = 0; j < pSize; j++) {
+                                fwrite(&zero, 1, 1, file);
+                            }
+                        }
+                        
                         fclose(file);
-                        return "Partición lógica '" + name + "' eliminada exitosamente.";
+                        return "Partición lógica '" + name + "' eliminada exitosamente (" + delType + ").";
                     }
                     ebrPos = ebr.part_next;
                 }
@@ -235,6 +269,134 @@ inline std::string cmd_fdisk(const std::map<std::string, std::string>& params) {
 
         fclose(file);
         return "ERROR fdisk: No se encontró la partición '" + name + "'.";
+    }
+
+    // Verificar si es operacion de redimensionar
+    if (params.find("add") != params.end()) {
+        if (params.find("name") == params.end())
+            return "ERROR fdisk: Se requiere -name para redimensionar partición.";
+
+        std::string name = params.at("name");
+        int addSize = std::stoi(params.at("add"));
+        
+        char unit = 'K';
+        if (params.find("unit") != params.end()) {
+            std::string u = toLower(params.at("unit"));
+            if (u == "m") unit = 'M';
+            else if (u == "b") unit = 'B';
+        }
+
+        int addBytes = toBytes(std::abs(addSize), unit);
+        if (addSize < 0) addBytes = -addBytes;
+
+        FILE* file = fopen(path.c_str(), "rb+");
+        if (!file) return "ERROR fdisk: No se pudo abrir el disco.";
+
+        MBR mbr;
+        fseek(file, 0, SEEK_SET);
+        fread(&mbr, sizeof(MBR), 1, file);
+
+        // Recolectar la ubicacion y tamanho de la particion a modificar
+        int pIndex = -1;
+        bool isLogic = false;
+        int pStart = -1;
+        int pSize = -1;
+        int ebrPosToUpdate = -1;
+        
+        for (int i = 0; i < 4; i++) {
+            if (mbr.mbr_partitions[i].part_status == '1' &&
+                std::string(mbr.mbr_partitions[i].part_name) == name) {
+                pIndex = i;
+                pStart = mbr.mbr_partitions[i].part_start;
+                pSize = mbr.mbr_partitions[i].part_size;
+                break;
+            }
+        }
+
+        if (pIndex == -1) {
+            // Verificar si es logica
+            for (int i = 0; i < 4; i++) {
+                if (mbr.mbr_partitions[i].part_status == '1' &&
+                    mbr.mbr_partitions[i].part_type == 'E') {
+                    int ebrPos = mbr.mbr_partitions[i].part_start;
+                    while (ebrPos != -1) {
+                        EBR ebr;
+                        fseek(file, ebrPos, SEEK_SET);
+                        fread(&ebr, sizeof(EBR), 1, file);
+                        if (ebr.part_mount == '1' && std::string(ebr.part_name) == name) {
+                            isLogic = true;
+                            pStart = ebr.part_start;
+                            pSize = ebr.part_size;
+                            ebrPosToUpdate = ebrPos;
+                            break;
+                        }
+                        ebrPos = ebr.part_next;
+                    }
+                    if (isLogic) break;
+                }
+            }
+        }
+
+        if (pIndex == -1 && !isLogic) {
+            fclose(file);
+            return "ERROR fdisk: No se encontró la partición '" + name + "' para redimensionar.";
+        }
+
+        int newSize = pSize + addBytes;
+        if (newSize <= 0) {
+            fclose(file);
+            return "ERROR fdisk: El tamaño final de la partición resultaría <= 0.";
+        }
+
+        // Si es aumento, verificar solapamiento
+        if (addBytes > 0) {
+            // Buscar inicio de la siguiente particion
+            int nextStart = mbr.mbr_tamano; // Limite del disco
+
+            for (int i = 0; i < 4; i++) {
+                if (mbr.mbr_partitions[i].part_status == '1') {
+                    if (mbr.mbr_partitions[i].part_start > pStart) {
+                        if (mbr.mbr_partitions[i].part_start < nextStart) {
+                            nextStart = mbr.mbr_partitions[i].part_start;
+                        }
+                    }
+                }
+            }
+
+            // Si es logica, buscar limite mas estricto (siguiente EBR)
+            if (isLogic) {
+                EBR currEbr;
+                fseek(file, ebrPosToUpdate, SEEK_SET);
+                fread(&currEbr, sizeof(EBR), 1, file);
+                if (currEbr.part_next != -1) {
+                    if (currEbr.part_next < nextStart) {
+                        nextStart = currEbr.part_next;
+                    }
+                }
+            }
+            
+            if (pStart + newSize > nextStart) {
+                fclose(file);
+                return "ERROR fdisk: No hay suficiente espacio libre (" + std::to_string(addBytes) + " b) después de la partición.";
+            }
+        }
+        
+        // Aplicar redimensionado
+        if (!isLogic) {
+            mbr.mbr_partitions[pIndex].part_size = newSize;
+            fseek(file, 0, SEEK_SET);
+            fwrite(&mbr, sizeof(MBR), 1, file);
+        } else {
+            EBR ebr;
+            fseek(file, ebrPosToUpdate, SEEK_SET);
+            fread(&ebr, sizeof(EBR), 1, file);
+            ebr.part_size = newSize;
+            fseek(file, ebrPosToUpdate, SEEK_SET);
+            fwrite(&ebr, sizeof(EBR), 1, file);
+        }
+
+        fclose(file);
+        return "Partición '" + name + "' " + (addBytes > 0 ? "ampliada" : "reducida") + " en " + std::to_string(std::abs(addBytes)) + " bytes exitosamente.";
     }
 
     // Crear particion

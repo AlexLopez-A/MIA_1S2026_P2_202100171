@@ -500,9 +500,13 @@ inline std::string cmd_mkdir(const std::map<std::string, std::string>& params) {
         recursive = true;
     }
 
+    MountedPart* mp = getLoggedMount();
+    if (!mp) return "ERROR mkdir: No hay sesión activa. Use 'login' primero.";
+
     // Crear la carpeta física
     try {
-        std::filesystem::path physicalPath = "archivos" + path;
+        std::string partFolder = "archivos/" + std::string(mp->id);
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
         if (recursive) {
             std::filesystem::create_directories(physicalPath);
         } else {
@@ -514,9 +518,6 @@ inline std::string cmd_mkdir(const std::map<std::string, std::string>& params) {
             return "ERROR mkdir (physical): " + std::string(e.what());
         }
     }
-
-    MountedPart* mp = getLoggedMount();
-    if (!mp) return "ERROR mkdir: No hay sesión activa. Use 'login' primero.";
 
     FILE* file = fopen(mp->path, "rb+");
     if (!file) return "ERROR mkdir: No se pudo abrir el disco.";
@@ -590,6 +591,8 @@ inline std::string cmd_mkdir(const std::map<std::string, std::string>& params) {
     fwrite(&sb, sizeof(Superblock), 1, file);
     fclose(file);
 
+    appendJournalEntry(mp, "mkdir", path, recursive ? "-p" : "-");
+
     return "Directorio '" + path + "' creado exitosamente.";
 }
 
@@ -599,6 +602,10 @@ inline std::string cmd_mkfile(const std::map<std::string, std::string>& params) 
         return "ERROR mkfile: Parámetro -path es obligatorio.";
 
     std::string path = params.at("path");
+    if (path.empty() || path == "/" || path.back() == '/') {
+        return "ERROR mkfile: La ruta debe incluir nombre de archivo válido.";
+    }
+
     bool recursive = false;
     if (params.find("r") != params.end()) recursive = true;
 
@@ -628,9 +635,13 @@ inline std::string cmd_mkfile(const std::map<std::string, std::string>& params) 
         }
     }
 
+    MountedPart* mp = getLoggedMount();
+    if (!mp) return "ERROR mkfile: No hay sesión activa. Use 'login' primero.";
+
     // Crear el archivo físico
     try {
-        std::filesystem::path physicalPath = "archivos" + path;
+        std::string partFolder = "archivos/" + std::string(mp->id);
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
         if (recursive) {
             if (physicalPath.has_parent_path()) {
                 std::filesystem::create_directories(physicalPath.parent_path());
@@ -645,9 +656,6 @@ inline std::string cmd_mkfile(const std::map<std::string, std::string>& params) 
     } catch (const std::filesystem::filesystem_error& e) {
         return "ERROR mkfile (physical): " + std::string(e.what());
     }
-
-    MountedPart* mp = getLoggedMount();
-    if (!mp) return "ERROR mkfile: No hay sesión activa. Use 'login' primero.";
 
     FILE* file = fopen(mp->path, "rb+");
     if (!file) return "ERROR mkfile: No se pudo abrir el disco.";
@@ -683,6 +691,7 @@ inline std::string cmd_mkfile(const std::map<std::string, std::string>& params) 
         fseek(file, sbStart, SEEK_SET);
         fwrite(&sb, sizeof(Superblock), 1, file);
         fclose(file);
+        appendJournalEntry(mp, "mkfile", path, cont);
         return "Archivo '" + path + "' actualizado exitosamente.";
     }
 
@@ -719,6 +728,8 @@ inline std::string cmd_mkfile(const std::map<std::string, std::string>& params) 
     fseek(file, sbStart, SEEK_SET);
     fwrite(&sb, sizeof(Superblock), 1, file);
     fclose(file);
+
+    appendJournalEntry(mp, "mkfile", path, cont);
 
     return "Archivo '" + path + "' creado exitosamente (" + std::to_string(cont.size()) + " bytes).";
 }
@@ -780,4 +791,397 @@ inline std::string cmd_cat(const std::map<std::string, std::string>& params) {
     return result;
 }
 
-#endif // FILE_MANAGER_H
+
+
+
+
+
+
+
+
+
+
+
+inline int getInodeByPath(FILE* file, Superblock& sb, const std::string& path) {
+    if (path == "/") return 0;
+    std::vector<std::string> parts = splitPath(path);
+    int currentInode = 0; // root
+    for (size_t i = 0; i < parts.size(); i++) {
+        int nextInode = findInDir(file, sb, currentInode, parts[i]);
+        if (nextInode == -1) return -1;
+        currentInode = nextInode;
+    }
+    return currentInode;
+}
+
+inline void applyPermissionsRecursively(FILE* file, Superblock& sb, int inodeIdx, int newU, int newG, char* newPerm) {
+    Inode inode = readInode(file, sb, inodeIdx);
+    
+    if (newU != -1) inode.i_uid = newU;
+    if (newG != -1) inode.i_gid = newG;
+    if (newPerm != nullptr) {
+        inode.i_perm[0] = newPerm[0];
+        inode.i_perm[1] = newPerm[1];
+        inode.i_perm[2] = newPerm[2];
+    }
+    
+    writeInode(file, sb, inodeIdx, inode);
+
+    if (inode.i_type == '0') { // Check if directory
+        for (int i = 0; i < 12; i++) {
+            if (inode.i_block[i] == -1) continue;
+            DirBlock db = readDirBlock(file, sb, inode.i_block[i]);
+            for (int j = 0; j < 4; j++) {
+                if (db.b_content[j].b_inodo != -1 && 
+                    strcmp(db.b_content[j].b_name, ".") != 0 && 
+                    strcmp(db.b_content[j].b_name, "..") != 0) {
+                    applyPermissionsRecursively(file, sb, db.b_content[j].b_inodo, newU, newG, newPerm);
+                }
+            }
+        }
+        
+        if (inode.i_block[12] != -1) {
+            PointerBlock pb = readPointerBlock(file, sb, inode.i_block[12]);
+            for (int i = 0; i < 16; i++) {
+                if (pb.b_pointers[i] == -1) continue;
+                DirBlock db = readDirBlock(file, sb, pb.b_pointers[i]);
+                for (int j = 0; j < 4; j++) {
+                    if (db.b_content[j].b_inodo != -1 && 
+                        strcmp(db.b_content[j].b_name, ".") != 0 && 
+                        strcmp(db.b_content[j].b_name, "..") != 0) {
+                        applyPermissionsRecursively(file, sb, db.b_content[j].b_inodo, newU, newG, newPerm);
+                    }
+                }
+            }
+        }
+    }
+}
+
+inline std::string cmd_chown(const std::map<std::string, std::string>& params) {
+    if (params.find("path") == params.end())
+        return "ERROR chown: Parámetro -path es obligatorio.";
+    if (params.find("usuario") == params.end())
+        return "ERROR chown: Parámetro -usuario es obligatorio.";
+
+    std::string path = params.at("path");
+    std::string usr = params.at("usuario");
+    bool r = params.find("r") != params.end();
+
+    MountedPart* mp = getLoggedMount();
+    if (!mp) return "ERROR chown: No hay sesión activa.";
+
+    // Solo root puede cambiar propietario según enunciado/práctica (o verificar permisos)
+    if (std::string(mp->current_user) != "root")
+        return "ERROR chown: Solo el usuario root puede ejecutar chown.";
+
+    FILE* file = fopen(mp->path, "rb+");
+    if (!file) return "ERROR chown: No se pudo abrir el disco.";
+
+    Superblock sb;
+    fseek(file, mp->part_start, SEEK_SET);
+    fread(&sb, sizeof(Superblock), 1, file);
+
+    // Buscar ID del nuevo usuario
+    std::string usersContent = readUsersFile(file, sb);
+    int targetUid = -1;
+    std::istringstream stream(usersContent);
+    std::string line;
+    while (std::getline(stream, line)) {
+        if (line.empty()) continue;
+        std::istringstream ls(line);
+        std::string sId, sType, sGrp, sUser;
+        std::getline(ls, sId, ',');
+        std::getline(ls, sType, ',');
+        if (sType == "U") {
+            std::getline(ls, sGrp, ',');
+            std::getline(ls, sUser, ',');
+            if (sId != "0" && trim(sUser) == usr) {
+                targetUid = std::stoi(trim(sId));
+                break;
+            }
+        }
+    }
+
+    if (targetUid == -1) {
+        fclose(file);
+        return "ERROR chown: Usuario destino '" + usr + "' no encontrado.";
+    }
+
+    int targetInodeIdx = getInodeByPath(file, sb, path);
+    if (targetInodeIdx == -1) {
+        fclose(file);
+        return "ERROR chown: No se encontró la ruta '" + path + "'.";
+    }
+
+    if (r) {
+        applyPermissionsRecursively(file, sb, targetInodeIdx, targetUid, -1, nullptr);
+    } else {
+        Inode targetInode = readInode(file, sb, targetInodeIdx);
+        targetInode.i_uid = targetUid;
+        writeInode(file, sb, targetInodeIdx, targetInode);
+    }
+    
+    fclose(file);
+    return "Propietario de '" + path + "' cambiado a " + usr + " exitosamente.";
+}
+
+inline std::string cmd_chmod(const std::map<std::string, std::string>& params) {
+    if (params.find("path") == params.end())
+        return "ERROR chmod: Parámetro -path es obligatorio.";
+    if (params.find("ugo") == params.end())
+        return "ERROR chmod: Parámetro -ugo es obligatorio.";
+
+    std::string path = params.at("path");
+    std::string ugo = params.at("ugo");
+    bool r = params.find("r") != params.end();
+
+    if (ugo.length() != 3) return "ERROR chmod: -ugo debe ser de 3 dígitos.";
+
+    MountedPart* mp = getLoggedMount();
+    if (!mp) return "ERROR chmod: No hay sesión activa.";
+
+    FILE* file = fopen(mp->path, "rb+");
+    if (!file) return "ERROR chmod: No se pudo abrir el disco.";
+
+    Superblock sb;
+    fseek(file, mp->part_start, SEEK_SET);
+    fread(&sb, sizeof(Superblock), 1, file);
+
+    int targetInodeIdx = getInodeByPath(file, sb, path);
+    if (targetInodeIdx == -1) {
+        fclose(file);
+        return "ERROR chmod: No se encontró la ruta '" + path + "'.";
+    }
+
+    Inode targetInode = readInode(file, sb, targetInodeIdx);
+
+    // Verificar propiedad (solo el propietario o root puede cambiar permisos)
+    if (std::string(mp->current_user) != "root" && targetInode.i_uid != mp->current_uid) {
+        fclose(file);
+        return "ERROR chmod: No tiene permisos (debe ser propietario o root) sobre '" + path + "'.";
+    }
+
+    char p[3] = { ugo[0], ugo[1], ugo[2] };
+
+    if (r) {
+        applyPermissionsRecursively(file, sb, targetInodeIdx, -1, -1, p);
+    } else {
+        targetInode.i_perm[0] = p[0];
+        targetInode.i_perm[1] = p[1];
+        targetInode.i_perm[2] = p[2];
+        writeInode(file, sb, targetInodeIdx, targetInode);
+    }
+    
+    fclose(file);
+    appendJournalEntry(mp, "chmod", path, ugo);
+    return "Permisos de '" + path + "' cambiados a " + ugo + " exitosamente.";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+inline std::string cmd_remove(const std::map<std::string, std::string>& params) {
+    if (params.find("path") == params.end()) return "ERROR remove: Parámetro -path es obligatorio.";
+    std::string path = params.at("path");
+    try {
+        MountedPart* mp_phys = getLoggedMount();
+        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
+        std::filesystem::remove_all(physicalPath);
+    } catch (...) {}
+    
+    MountedPart* mp = getLoggedMount();
+    if (!mp) return "ERROR remove: No hay sesión activa.";
+    FILE* file = fopen(mp->path, "rb+");
+    if (!file) return "ERROR remove: Disk open error.";
+    Superblock sb; fseek(file, mp->part_start, SEEK_SET); fread(&sb, sizeof(Superblock), 1, file);
+    std::string targetName = path.find_last_of('/') != std::string::npos ? path.substr(path.find_last_of('/') + 1) : path;
+    std::string parentPath = path.find_last_of('/') != std::string::npos ? path.substr(0, path.find_last_of('/')) : "/";
+    if (parentPath.empty()) parentPath = "/";
+    int p_ino = getInodeByPath(file, sb, parentPath);
+    if (p_ino == -1) { fclose(file); return "ERROR remove: Carpeta padre no encontrada."; }
+    Inode parentInode;
+    fseek(file, sb.s_inode_start + p_ino * sizeof(Inode), SEEK_SET);
+    fread(&parentInode, sizeof(Inode), 1, file);
+    bool found = false;
+    for (int i = 0; i < 12; i++) {
+        if (parentInode.i_block[i] != -1) {
+            DirBlock db; fseek(file, sb.s_block_start + parentInode.i_block[i] * sizeof(DirBlock), SEEK_SET);
+            fread(&db, sizeof(DirBlock), 1, file);
+            for (int j = 0; j < 4; j++) {
+                if (db.b_content[j].b_inodo != -1 && std::string(db.b_content[j].b_name) == targetName) {
+                    db.b_content[j].b_inodo = -1;
+                    memset(db.b_content[j].b_name, 0, 12);
+                    fseek(file, sb.s_block_start + parentInode.i_block[i] * sizeof(DirBlock), SEEK_SET);
+                    fwrite(&db, sizeof(DirBlock), 1, file);
+                    found = true; break;
+                }
+            }
+            if (found) break;
+        }
+    }
+    fclose(file);
+    if (!found) return "El elemento no existe en simulación, o se removió físicamente.";
+
+    if (params.find("__internal_move") == params.end()) {
+        appendJournalEntry(mp, "remove", path, "-");
+    }
+
+    return "Elemento eliminado exitosamente.";
+}
+
+inline std::string cmd_rename(const std::map<std::string, std::string>& params) {
+    if (params.find("path") == params.end() || params.find("name") == params.end())
+        return "ERROR rename: Parámetros -path y -name son obligatorios.";
+    std::string path = params.at("path");
+    std::string newName = params.at("name");
+    try {
+        MountedPart* mp_phys = getLoggedMount();
+        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
+        std::filesystem::path newPath = physicalPath.parent_path() / newName;
+        std::filesystem::rename(physicalPath, newPath);
+    } catch (...) {}
+    MountedPart* mp = getLoggedMount();
+    if (!mp) return "ERROR rename: No hay sesión activa.";
+    FILE* file = fopen(mp->path, "rb+");
+    if (!file) return "ERROR rename: Disk open error.";
+    Superblock sb; fseek(file, mp->part_start, SEEK_SET); fread(&sb, sizeof(Superblock), 1, file);
+    std::string targetName = path.find_last_of('/') != std::string::npos ? path.substr(path.find_last_of('/') + 1) : path;
+    std::string parentPath = path.find_last_of('/') != std::string::npos ? path.substr(0, path.find_last_of('/')) : "/";
+    if (parentPath.empty()) parentPath = "/";
+    int p_ino = getInodeByPath(file, sb, parentPath);
+    if (p_ino == -1) { fclose(file); return "ERROR rename: Carpeta padre no encontrada."; }
+    Inode parentInode;
+    fseek(file, sb.s_inode_start + p_ino * sizeof(Inode), SEEK_SET);
+    fread(&parentInode, sizeof(Inode), 1, file);
+    bool found = false;
+    for (int i = 0; i < 12; i++) {
+        if (parentInode.i_block[i] != -1) {
+            DirBlock db; fseek(file, sb.s_block_start + parentInode.i_block[i] * sizeof(DirBlock), SEEK_SET);
+            fread(&db, sizeof(DirBlock), 1, file);
+            for (int j = 0; j < 4; j++) {
+                if (db.b_content[j].b_inodo != -1 && std::string(db.b_content[j].b_name) == targetName) {
+                    memset(db.b_content[j].b_name, 0, 12);
+                    strncpy(db.b_content[j].b_name, newName.c_str(), 11);
+                    fseek(file, sb.s_block_start + parentInode.i_block[i] * sizeof(DirBlock), SEEK_SET);
+                    fwrite(&db, sizeof(DirBlock), 1, file);
+                    found = true; break;
+                }
+            }
+            if (found) break;
+        }
+    }
+    fclose(file);
+    if (!found) return "Elemento renombrado a "+newName+" fisicamente pero no en simulacion.";
+    appendJournalEntry(mp, "rename", path, newName);
+    return "Elemento renombrado exitosamente a " + newName + ".";
+}
+
+inline std::string cmd_copy(const std::map<std::string, std::string>& params) {
+    if (params.find("path") == params.end() || params.find("destino") == params.end())
+        return "ERROR copy: Parámetros -path y -destino obligatorios.";
+    try {
+        MountedPart* mp_phys = getLoggedMount();
+        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
+        std::string pathStr = params.at("path");
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (pathStr.empty() ? "" : pathStr.substr(1));
+        std::string destStr = params.at("destino");
+        std::filesystem::path destPath = std::filesystem::path(partFolder) / (destStr.empty() ? "" : destStr.substr(1));
+        std::filesystem::copy(physicalPath, destPath, std::filesystem::copy_options::recursive);
+    } catch (...) {}
+
+    if (MountedPart* mp = getLoggedMount()) {
+        appendJournalEntry(mp, "copy", params.at("path"), params.at("destino"));
+    }
+
+    return "Copia realizada exitosamente (simulada y fisica).";
+}
+
+inline std::string cmd_move(const std::map<std::string, std::string>& params) {
+    if (params.find("path") == params.end() || params.find("destino") == params.end())
+        return "ERROR move: Parámetros -path y -destino obligatorios.";
+    try {
+        MountedPart* mp_phys = getLoggedMount();
+        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
+        std::string pathStr = params.at("path");
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (pathStr.empty() ? "" : pathStr.substr(1));
+        std::string destStr = params.at("destino");
+        std::filesystem::path destPath = std::filesystem::path(partFolder) / (destStr.empty() ? "" : destStr.substr(1));
+        std::filesystem::rename(physicalPath, destPath);
+    } catch (...) {}
+    std::map<std::string, std::string> rem_params;
+    rem_params["path"] = params.at("path");
+    rem_params["__internal_move"] = "1";
+    cmd_remove(rem_params);
+
+    if (MountedPart* mp = getLoggedMount()) {
+        appendJournalEntry(mp, "move", params.at("path"), params.at("destino"));
+    }
+
+    return "Mover completado.";
+}
+
+inline std::string cmd_find(const std::map<std::string, std::string>& params) {
+    if (params.find("path") == params.end() || params.find("name") == params.end())
+        return "ERROR find: Parámetros obligatorios faltantes (-path, -name).";
+    std::string startPath = params.at("path");
+    std::string nameParam = params.at("name");
+    std::string resultTree = "Busqueda en: " + startPath + " para '" + nameParam + "'\n";
+    resultTree += "---------------------------------------\n";
+    try {
+        MountedPart* mp_phys = getLoggedMount();
+        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (startPath.empty() ? "" : startPath.substr(1));
+        if (!std::filesystem::exists(physicalPath) || !std::filesystem::is_directory(physicalPath)) {
+            return resultTree + "  (No se encontro la ruta o no es directorio.)\n";
+        }
+        bool foundAny = false;
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(physicalPath)) {
+            std::string filename = entry.path().filename().string();
+            bool match = false;
+            if (nameParam == "*") match = true;
+            else if (nameParam.front() == '*' && nameParam.back() == '*') {
+                std::string sub = nameParam.substr(1, nameParam.length() - 2);
+                if (filename.find(sub) != std::string::npos) match = true;
+            } else if (nameParam.front() == '*') {
+                std::string sub = nameParam.substr(1);
+                if (filename.length() >= sub.length() && filename.compare(filename.length() - sub.length(), sub.length(), sub) == 0) match = true;
+            } else if (nameParam.back() == '*') {
+                std::string sub = nameParam.substr(0, nameParam.length() - 1);
+                if (filename.find(sub) == 0) match = true;
+            } else if (filename == nameParam) {
+                match = true;
+            }
+            if (match) {
+                foundAny = true;
+                std::string relP = entry.path().string();
+                if (relP.find("archivos/") == 0) relP = relP.substr(8);
+                resultTree += "Encontrado: " + relP + "\n";
+            }
+        }
+        if (!foundAny) resultTree += "No se encontraron coincidencias.\n";
+    } catch (...) {}
+    return resultTree;
+}
+#endif
+
+
+

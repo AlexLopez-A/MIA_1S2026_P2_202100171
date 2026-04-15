@@ -20,6 +20,11 @@ inline std::string cmd_mkfs(const std::map<std::string, std::string>& params) {
         type = toLower(params.at("type"));
     }
 
+    std::string fsType = "2fs"; 
+    if (params.find("fs") != params.end()) {
+        fsType = toLower(params.at("fs"));
+    }
+
     // Buscar particion montada
     MountedPart* mp = getMountedById(id);
     if (!mp)
@@ -83,12 +88,16 @@ inline std::string cmd_mkfs(const std::map<std::string, std::string>& params) {
         return "ERROR mkfs: No se encontró la partición.";
     }
 
-    // Calcular distribucion EXT2
-    // n = (partSize - sizeof(Superblock)) / (1 + 3 + sizeof(Inode) + 3*sizeof(FileBlock))
-    // Para EXT2: proporcion bloques:inodos = 3:1
-    int numerator = partSize - (int)sizeof(Superblock);
-    int denominator = 1 + 3 + (int)sizeof(Inode) + 3 * (int)sizeof(FileBlock);
-    int n = (int)std::floor((double)numerator / denominator);
+    int n = 0;
+    if (fsType == "3fs") {
+        int numerator = partSize - (int)sizeof(Superblock) - 50 * (int)sizeof(Journal);
+        int denominator = 1 + 3 + (int)sizeof(Inode) + 3 * (int)sizeof(FileBlock);
+        n = (int)std::floor((double)numerator / denominator);
+    } else {
+        int numerator = partSize - (int)sizeof(Superblock);
+        int denominator = 1 + 3 + (int)sizeof(Inode) + 3 * (int)sizeof(FileBlock);
+        n = (int)std::floor((double)numerator / denominator);
+    }
 
     if (n <= 0) {
         fclose(file);
@@ -100,7 +109,7 @@ inline std::string cmd_mkfs(const std::map<std::string, std::string>& params) {
 
     // Crear superbloque
     Superblock sb;
-    sb.s_filesystem_type = 2; // EXT2
+    sb.s_filesystem_type = (fsType == "3fs") ? 3 : 2;
     sb.s_inodes_count = inodeCount;
     sb.s_blocks_count = blockCount;
     sb.s_free_inodes_count = inodeCount;
@@ -114,9 +123,10 @@ inline std::string cmd_mkfs(const std::map<std::string, std::string>& params) {
     sb.s_first_ino = 0;
     sb.s_first_blo = 0;
 
-    // Distribucion: Superblock | BM_Inodes | BM_Blocks | Inodes | Blocks
+    // Distribucion: Superblock | [Journaling si es 3fs] | BM_Inodes | BM_Blocks | Inodes | Blocks
     int sbStart = partStart;
-    int bmInodeStart = sbStart + (int)sizeof(Superblock);
+    int journalStart = sbStart + (int)sizeof(Superblock);
+    int bmInodeStart = (fsType == "3fs") ? journalStart + 50 * (int)sizeof(Journal) : journalStart;
     int bmBlockStart = bmInodeStart + inodeCount;
     int inodeStart = bmBlockStart + blockCount;
     int blockStart = inodeStart + inodeCount * (int)sizeof(Inode);
@@ -136,6 +146,15 @@ inline std::string cmd_mkfs(const std::map<std::string, std::string>& params) {
     // Escribir superbloque
     fseek(file, sbStart, SEEK_SET);
     fwrite(&sb, sizeof(Superblock), 1, file);
+
+    // Escribir estructuras de Journaling si es 3fs
+    if (fsType == "3fs") {
+        Journal emptyJournal;
+        fseek(file, journalStart, SEEK_SET);
+        for (int i = 0; i < 50; i++) {
+            fwrite(&emptyJournal, sizeof(Journal), 1, file);
+        }
+    }
 
     // Inicializar bitmaps en 0
     // (ya quedaron en cero)
@@ -228,8 +247,100 @@ inline std::string cmd_mkfs(const std::map<std::string, std::string>& params) {
 
     fclose(file);
 
-    return "Sistema de archivos EXT2 creado exitosamente en partición '" + partName + "'. "
+    if (fsType == "3fs") {
+        appendJournalEntry(mp, "mkfs", "/" + partName, "fs=" + fsType);
+    }
+    
+    std::string fsNameName = (fsType == "3fs") ? "EXT3" : "EXT2";
+
+    return "Sistema de archivos " + fsNameName + " creado exitosamente en partición '" + partName + "'. "
            "Inodos: " + std::to_string(inodeCount) + ", Bloques: " + std::to_string(blockCount);
 }
 
-#endif // FS_MANAGER_H
+
+inline std::string cmd_loss(const std::map<std::string, std::string>& params) {
+    if (params.find("id") == params.end())
+        return "ERROR loss: Parámetro -id es obligatorio.";
+
+    std::string id = params.at("id");
+    MountedPart* mp = getMountedById(id);
+    if (!mp) return "ERROR loss: Participón montada no encontrada.";
+
+    FILE* file = fopen(mp->path, "rb+");
+    if (!file) return "ERROR loss: No se pudo abrir el disco.";
+
+    Superblock sb;
+    fseek(file, mp->part_start, SEEK_SET);
+    fread(&sb, sizeof(Superblock), 1, file);
+
+    int startZero = sb.s_bm_inode_start;
+    int endZero = sb.s_block_start + (sb.s_blocks_count * (int)sizeof(FileBlock));
+
+    char buffer[4096];
+    memset(buffer, 0, 4096);
+    int remaining = endZero - startZero;
+    fseek(file, startZero, SEEK_SET);
+    while (remaining > 0) {
+        int toWrite = (remaining > 4096) ? 4096 : remaining;
+        fwrite(buffer, 1, toWrite, file);
+        remaining -= toWrite;
+    }
+    
+    fclose(file);
+    return "Pérdida de datos simulada exitosamente (Bitmaps e Inodos/Bloques en 0).";
+}
+
+inline std::string cmd_journaling(const std::map<std::string, std::string>& params) {
+    if (params.find("id") == params.end())
+        return "ERROR journaling: Parámetro -id es obligatorio.";
+
+    std::string id = params.at("id");
+    MountedPart* mp = getMountedById(id);
+    if (!mp) return "ERROR journaling: Partición no montada.";
+
+    FILE* file = fopen(mp->path, "rb");
+    if (!file) return "ERROR journaling: No se pudo abrir el disco.";
+
+    Superblock sb;
+    fseek(file, mp->part_start, SEEK_SET);
+    fread(&sb, sizeof(Superblock), 1, file);
+
+    if (sb.s_filesystem_type != 3) {
+        fclose(file);
+        return "ERROR journaling: La partición no es EXT3.";
+    }
+
+    int journalStart = mp->part_start + (int)sizeof(Superblock);
+    
+    std::string result = "=== REPORTE JOURNALING ===\n";
+    result += "Operación\tPath\t\t\tContenido\t\tFecha\n";
+    result += "---------\t----\t\t\t---------\t\t-----\n";
+    int entryCount = 0;
+
+    fseek(file, journalStart, SEEK_SET);
+    for (int i = 0; i < 50; i++) {
+        Journal j;
+        fread(&j, sizeof(Journal), 1, file);
+        if (j.j_content.i_operation[0] != '\0') { // Si hay operacion
+            char dateBuff[20];
+            struct tm* tm_info = localtime(&j.j_content.i_date);
+            strftime(dateBuff, 20, "%Y-%m-%d %H:%M", tm_info);
+
+            result += std::string(j.j_content.i_operation) + "\t" + 
+                      std::string(j.j_content.i_path) + "\t" + 
+                      std::string(j.j_content.i_content) + "\t" + 
+                      std::string(dateBuff) + "\n";
+            entryCount++;
+        }
+    }
+
+    fclose(file);
+
+    if (entryCount == 0) {
+        result += "(Sin entradas de journaling registradas)\n";
+    }
+    result += "Total de entradas: " + std::to_string(entryCount);
+
+    return result;
+}
+#endif

@@ -9,6 +9,8 @@
 #include <cstring>
 #include <cstdio>
 #include <map>
+#include <algorithm>
+#include <cctype>
 
 // Lista global de particiones montadas
 inline std::vector<MountedPart>& getMountedList() {
@@ -56,10 +58,18 @@ inline bool isAlreadyMounted(const std::string& diskPath, const std::string& par
 }
 
 // Obtiene una particion montada por ID
+inline std::string normalizeMountId(const std::string& id) {
+    std::string normalized = id;
+    std::transform(normalized.begin(), normalized.end(), normalized.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
+    return normalized;
+}
+
 inline MountedPart* getMountedById(const std::string& id) {
+    std::string targetId = normalizeMountId(id);
     auto& mounted = getMountedList();
     for (auto& m : mounted) {
-        if (std::string(m.id) == id) {
+        if (normalizeMountId(std::string(m.id)) == targetId) {
             return &m;
         }
     }
@@ -187,10 +197,11 @@ inline std::string cmd_unmount(const std::map<std::string, std::string>& params)
         return "ERROR unmount: Parámetro -id es obligatorio.";
 
     std::string id = params.at("id");
+    std::string normalizedId = normalizeMountId(id);
     auto& mounted = getMountedList();
 
     for (auto it = mounted.begin(); it != mounted.end(); ++it) {
-        if (std::string(it->id) == id) {
+        if (normalizeMountId(std::string(it->id)) == normalizedId) {
             std::string name = std::string(it->name);
             std::string diskPath = std::string(it->path);
 
@@ -203,7 +214,7 @@ inline std::string cmd_unmount(const std::map<std::string, std::string>& params)
                 for (int i = 0; i < 4; i++) {
                     if (mbr.mbr_partitions[i].part_status == '1' &&
                         std::string(mbr.mbr_partitions[i].part_name) == name) {
-                        mbr.mbr_partitions[i].part_correlative = -1;
+                        mbr.mbr_partitions[i].part_correlative = 0;
                         memset(mbr.mbr_partitions[i].part_id, 0, 4);
                         fseek(file, 0, SEEK_SET);
                         fwrite(&mbr, sizeof(MBR), 1, file);

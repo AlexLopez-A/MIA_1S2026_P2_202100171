@@ -61,6 +61,31 @@ struct EBR {
     }
 };
 
+// ==================== Journaling (EXT3) ====================
+
+struct Information {
+    char i_operation[10];
+    char i_path[32];
+    char i_content[64];
+    time_t i_date;
+
+    Information() {
+        memset(i_operation, 0, 10);
+        memset(i_path, 0, 32);
+        memset(i_content, 0, 64);
+        i_date = 0;
+    }
+};
+
+struct Journal {
+    int j_count;
+    Information j_content;
+
+    Journal() {
+        j_count = 0;
+    }
+};
+
 // ==================== EXT2 Superblock ====================
 
 struct Superblock {

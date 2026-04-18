@@ -561,4 +561,5 @@ inline std::string cmd_chgrp(const std::map<std::string, std::string>& params) {
     return "Grupo del usuario '" + user + "' cambiado a '" + grp + "' exitosamente.";
 }
 
-#endif // USER_MANAGER_H
+
+#endif

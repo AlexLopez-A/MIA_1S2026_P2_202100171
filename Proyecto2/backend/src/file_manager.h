@@ -500,13 +500,9 @@ inline std::string cmd_mkdir(const std::map<std::string, std::string>& params) {
         recursive = true;
     }
 
-    MountedPart* mp = getLoggedMount();
-    if (!mp) return "ERROR mkdir: No hay sesión activa. Use 'login' primero.";
-
     // Crear la carpeta física
     try {
-        std::string partFolder = "archivos/" + std::string(mp->id);
-        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
+        std::filesystem::path physicalPath = "archivos" + path;
         if (recursive) {
             std::filesystem::create_directories(physicalPath);
         } else {
@@ -518,6 +514,9 @@ inline std::string cmd_mkdir(const std::map<std::string, std::string>& params) {
             return "ERROR mkdir (physical): " + std::string(e.what());
         }
     }
+
+    MountedPart* mp = getLoggedMount();
+    if (!mp) return "ERROR mkdir: No hay sesión activa. Use 'login' primero.";
 
     FILE* file = fopen(mp->path, "rb+");
     if (!file) return "ERROR mkdir: No se pudo abrir el disco.";
@@ -635,13 +634,9 @@ inline std::string cmd_mkfile(const std::map<std::string, std::string>& params) 
         }
     }
 
-    MountedPart* mp = getLoggedMount();
-    if (!mp) return "ERROR mkfile: No hay sesión activa. Use 'login' primero.";
-
     // Crear el archivo físico
     try {
-        std::string partFolder = "archivos/" + std::string(mp->id);
-        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
+        std::filesystem::path physicalPath = "archivos" + path;
         if (recursive) {
             if (physicalPath.has_parent_path()) {
                 std::filesystem::create_directories(physicalPath.parent_path());
@@ -656,6 +651,9 @@ inline std::string cmd_mkfile(const std::map<std::string, std::string>& params) 
     } catch (const std::filesystem::filesystem_error& e) {
         return "ERROR mkfile (physical): " + std::string(e.what());
     }
+
+    MountedPart* mp = getLoggedMount();
+    if (!mp) return "ERROR mkfile: No hay sesión activa. Use 'login' primero.";
 
     FILE* file = fopen(mp->path, "rb+");
     if (!file) return "ERROR mkfile: No se pudo abrir el disco.";
@@ -1001,9 +999,7 @@ inline std::string cmd_remove(const std::map<std::string, std::string>& params) 
     if (params.find("path") == params.end()) return "ERROR remove: Parámetro -path es obligatorio.";
     std::string path = params.at("path");
     try {
-        MountedPart* mp_phys = getLoggedMount();
-        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
-        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
+        std::filesystem::path physicalPath = "archivos" + path;
         std::filesystem::remove_all(physicalPath);
     } catch (...) {}
     
@@ -1053,9 +1049,7 @@ inline std::string cmd_rename(const std::map<std::string, std::string>& params) 
     std::string path = params.at("path");
     std::string newName = params.at("name");
     try {
-        MountedPart* mp_phys = getLoggedMount();
-        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
-        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
+        std::filesystem::path physicalPath = "archivos" + path;
         std::filesystem::path newPath = physicalPath.parent_path() / newName;
         std::filesystem::rename(physicalPath, newPath);
     } catch (...) {}
@@ -1099,12 +1093,8 @@ inline std::string cmd_copy(const std::map<std::string, std::string>& params) {
     if (params.find("path") == params.end() || params.find("destino") == params.end())
         return "ERROR copy: Parámetros -path y -destino obligatorios.";
     try {
-        MountedPart* mp_phys = getLoggedMount();
-        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
-        std::string pathStr = params.at("path");
-        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (pathStr.empty() ? "" : pathStr.substr(1));
-        std::string destStr = params.at("destino");
-        std::filesystem::path destPath = std::filesystem::path(partFolder) / (destStr.empty() ? "" : destStr.substr(1));
+        std::filesystem::path physicalPath = "archivos" + params.at("path");
+        std::filesystem::path destPath = "archivos" + params.at("destino");
         std::filesystem::copy(physicalPath, destPath, std::filesystem::copy_options::recursive);
     } catch (...) {}
 
@@ -1119,12 +1109,8 @@ inline std::string cmd_move(const std::map<std::string, std::string>& params) {
     if (params.find("path") == params.end() || params.find("destino") == params.end())
         return "ERROR move: Parámetros -path y -destino obligatorios.";
     try {
-        MountedPart* mp_phys = getLoggedMount();
-        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
-        std::string pathStr = params.at("path");
-        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (pathStr.empty() ? "" : pathStr.substr(1));
-        std::string destStr = params.at("destino");
-        std::filesystem::path destPath = std::filesystem::path(partFolder) / (destStr.empty() ? "" : destStr.substr(1));
+        std::filesystem::path physicalPath = "archivos" + params.at("path");
+        std::filesystem::path destPath = "archivos" + params.at("destino");
         std::filesystem::rename(physicalPath, destPath);
     } catch (...) {}
     std::map<std::string, std::string> rem_params;
@@ -1147,9 +1133,7 @@ inline std::string cmd_find(const std::map<std::string, std::string>& params) {
     std::string resultTree = "Busqueda en: " + startPath + " para '" + nameParam + "'\n";
     resultTree += "---------------------------------------\n";
     try {
-        MountedPart* mp_phys = getLoggedMount();
-        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
-        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (startPath.empty() ? "" : startPath.substr(1));
+        std::filesystem::path physicalPath = "archivos" + startPath;
         if (!std::filesystem::exists(physicalPath) || !std::filesystem::is_directory(physicalPath)) {
             return resultTree + "  (No se encontro la ruta o no es directorio.)\n";
         }

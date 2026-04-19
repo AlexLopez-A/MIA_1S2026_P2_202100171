@@ -7,6 +7,8 @@
 #include <fstream>
 #include <sstream>
 #include <cstring>
+#include <cstdio>
+#include "structures.h"
 
 // Verifica si el archivo existe
 inline bool fileExists(const std::string& path) {
@@ -87,6 +89,63 @@ inline std::string getDirname(const std::string& path) {
     if (pos == std::string::npos) return "/";
     if (pos == 0) return "/";
     return path.substr(0, pos);
+}
+
+inline bool appendJournalEntry(const MountedPart* mp,
+                               const std::string& operation,
+                               const std::string& path,
+                               const std::string& content) {
+    if (!mp || operation.empty()) return false;
+
+    FILE* file = fopen(mp->path, "rb+");
+    if (!file) return false;
+
+    Superblock sb;
+    fseek(file, mp->part_start, SEEK_SET);
+    if (fread(&sb, sizeof(Superblock), 1, file) != 1) {
+        fclose(file);
+        return false;
+    }
+
+    // Solo EXT3 tiene journaling
+    if (sb.s_filesystem_type != 3) {
+        fclose(file);
+        return false;
+    }
+
+    int journalStart = mp->part_start + (int)sizeof(Superblock);
+
+    Journal entry{};
+    entry.j_count = 1;
+
+    std::string op = operation.substr(0, sizeof(entry.j_content.i_operation) - 1);
+    std::string p = path.substr(0, sizeof(entry.j_content.i_path) - 1);
+    std::string c = content.substr(0, sizeof(entry.j_content.i_content) - 1);
+
+    strncpy(entry.j_content.i_operation, op.c_str(), sizeof(entry.j_content.i_operation) - 1);
+    strncpy(entry.j_content.i_path, p.c_str(), sizeof(entry.j_content.i_path) - 1);
+    strncpy(entry.j_content.i_content, c.c_str(), sizeof(entry.j_content.i_content) - 1);
+    entry.j_content.i_date = getCurrentTime();
+
+    int writeIndex = -1;
+    for (int i = 0; i < 50; i++) {
+        Journal current;
+        fseek(file, journalStart + i * (int)sizeof(Journal), SEEK_SET);
+        if (fread(&current, sizeof(Journal), 1, file) != 1) break;
+
+        if (current.j_content.i_operation[0] == '\0') {
+            writeIndex = i;
+            break;
+        }
+    }
+
+    // Si ya está lleno, sobrescribir la última entrada.
+    if (writeIndex == -1) writeIndex = 49;
+
+    fseek(file, journalStart + writeIndex * (int)sizeof(Journal), SEEK_SET);
+    bool ok = fwrite(&entry, sizeof(Journal), 1, file) == 1;
+    fclose(file);
+    return ok;
 }
 
 #endif // UTILS_H

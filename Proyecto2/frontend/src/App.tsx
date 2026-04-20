@@ -3,7 +3,8 @@ import Header from './components/Header/Header';
 import CommandInput from './components/CommandInput/CommandInput';
 import ConsoleOutput from './components/ConsoleOutput/ConsoleOutput';
 import MountedModal from './components/MountedModal/MountedModal';
-import ReportViewer from './components/ReportViewer/ReportViewer.tsx';
+import ReportViewer from './components/ReportViewer/ReportViewer';
+import Explorer from './components/Explorer/Explorer';
 import { useConsole } from './hooks/useConsole';
 import type { GeneratedReport } from './types';
 import './App.css';
@@ -27,6 +28,7 @@ function App() {
   const [showMounted, setShowMounted] = useState(false);
   const [showReports, setShowReports] = useState(false);
   const [generatedReports, setGeneratedReports] = useState<GeneratedReport[]>([]);
+  const [showExplorer, setShowExplorer] = useState(false);
 
   const handleExecute = useCallback(async (input: string) => {
     const results = await executeInput(input);
@@ -73,24 +75,37 @@ function App() {
         onShowReports={() => setShowReports(true)}
         reportsCount={generatedReports.length}
       />
+      
+      <div style={{padding: '5px', background: '#242424', borderBottom: '1px solid #444', display: 'flex', justifyContent: 'flex-start'}}>
+         <button 
+            style={{padding: '6px 12px', cursor: 'pointer', background: showExplorer ? '#3b82f6' : '#1a1a1a', color: 'white', border: '1px solid #444', borderRadius: '4px'}}
+            onClick={() => setShowExplorer(!showExplorer)}
+         >
+            {showExplorer ? "Volver a Consola" : "Abrir Explorador Web (Visual)"}
+         </button>
+      </div>
 
       <main className="main-content">
-        <div className="workspace">
-          <div className="panel left-panel">
-            <CommandInput
-              onExecute={handleExecute}
-              onLoadScript={handleLoadScript}
-              isExecuting={isExecuting}
-            />
+        {showExplorer ? (
+           <Explorer />
+        ) : (
+          <div className="workspace">
+            <div className="panel left-panel">
+              <CommandInput
+                onExecute={handleExecute}
+                onLoadScript={handleLoadScript}
+                isExecuting={isExecuting}
+              />
+            </div>
+            <div className="panel-divider" />
+            <div className="panel right-panel">
+              <ConsoleOutput
+                entries={entries}
+                onClear={clearConsole}
+              />
+            </div>
           </div>
-          <div className="panel-divider" />
-          <div className="panel right-panel">
-            <ConsoleOutput
-              entries={entries}
-              onClear={clearConsole}
-            />
-          </div>
-        </div>
+        )}
       </main>
 
       <footer className="app-footer">

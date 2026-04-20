@@ -1,94 +1,69 @@
 import axios from 'axios';
-import type { CommandResponse, MountedPartition } from '../types';
+import type {
+  CommandResponse,
+  DiskPartitionsResponse,
+  DiskSummary,
+  FileContentResponse,
+  FileTreeResponse,
+  JournalTableResponse,
+  MountedPartition,
+} from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE_URL = 'http://localhost:8080/api';
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-export const executeCommand = async (command: string): Promise<CommandResponse> => {
-  try {
-    const response = await api.post<CommandResponse>('/api/execute', { command });
-    return response.data;
-  } catch (error: any) {
-    if (error.response) {
-      return {
-        success: false,
-        message: error.response.data?.message || 'Error del servidor',
-        output: error.response.data?.output || '',
-      };
-    }
-    return {
-      success: false,
-      message: 'Error de conexión con el backend. Asegúrese de que el servidor esté corriendo.',
-      output: '',
-    };
-  }
+export const executeCommand = async (command: string) => {
+  const response = await axios.post<CommandResponse>(`${API_BASE_URL}/execute`, { command });
+  return response.data;
 };
 
-export const executeScript = async (script: string): Promise<CommandResponse[]> => {
-  try {
-    const response = await api.post<CommandResponse[]>('/api/execute-script', { script });
-    return response.data;
-  } catch (error: any) {
-    if (error.response) {
-      return [{
-        success: false,
-        message: error.response.data?.message || 'Error del servidor',
-        output: error.response.data?.output || '',
-      }];
-    }
-    return [{
-      success: false,
-      message: 'Error de conexión con el backend.',
-      output: '',
-    }];
-  }
+export const executeScript = async (script: string) => {
+  const response = await axios.post(`${API_BASE_URL}/execute-script`, { script });
+  return response.data;
 };
 
-export const getMountedPartitions = async (): Promise<MountedPartition[]> => {
-  try {
-    const response = await api.get<MountedPartition[]>('/api/mounted');
-    return response.data;
-  } catch {
-    return [];
-  }
+export const getMountedPartitions = async () => {
+  const response = await axios.get<MountedPartition[]>(`${API_BASE_URL}/mounted`);
+  return response.data;
 };
 
-export const getReport = async (reportPath: string): Promise<string> => {
-  try {
-    const response = await api.get('/api/report', { params: { path: reportPath } });
-    return response.data;
-  } catch {
-    return '';
-  }
+export const getDisks = async () => {
+  const response = await axios.get<DiskSummary[]>(`${API_BASE_URL}/disks`);
+  return response.data;
 };
 
-export interface ReportFileResponse {
-  data: ArrayBuffer;
-  contentType: string;
-}
-
-export const getReportFile = async (reportPath: string): Promise<ReportFileResponse | null> => {
-  try {
-    const response = await api.get<ArrayBuffer>('/api/report', {
-      params: { path: reportPath },
-      responseType: 'arraybuffer',
-    });
-
-    const contentType = response.headers['content-type'] || 'application/octet-stream';
-
-    return {
-      data: response.data,
-      contentType,
-    };
-  } catch {
-    return null;
-  }
+export const getDiskPartitions = async (path: string) => {
+  const response = await axios.get<DiskPartitionsResponse>(`${API_BASE_URL}/disks/partitions`, { params: { path } });
+  return response.data;
 };
 
-export default api;
+export const getFsTree = async (id: string, path: string = '/') => {
+  const response = await axios.get<FileTreeResponse>(`${API_BASE_URL}/fs/tree`, { params: { id, path } });
+  return response.data;
+};
+
+export const getFsFileContent = async (id: string, path: string) => {
+  const response = await axios.get<FileContentResponse>(`${API_BASE_URL}/fs/file-content`, { params: { id, path } });
+  return response.data;
+};
+
+export const getFileTree = async (path: string = '/') => {
+  const response = await axios.get(`${API_BASE_URL}/tree`, { params: { path } });
+  return response.data;
+};
+
+export const getJournal = async (id: string = '') => {
+  const response = await axios.get(`${API_BASE_URL}/journal`, { params: { id } });
+  return response.data;
+};
+
+export const getJournalTable = async (id: string) => {
+  const response = await axios.get<JournalTableResponse>(`${API_BASE_URL}/journal-table`, { params: { id } });
+  return response.data;
+};
+
+export const getReportContent = async (path: string) => {
+  const response = await axios.get(`${API_BASE_URL}/report`, { params: { path } });
+  return response.data;
+};
+
+export const getReportFile = getReportContent;

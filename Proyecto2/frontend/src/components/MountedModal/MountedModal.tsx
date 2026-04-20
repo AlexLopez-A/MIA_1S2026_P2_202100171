@@ -78,10 +78,12 @@ const MountedModal: React.FC<MountedModalProps> = ({ isOpen, onClose }) => {
                 {partitions.map((p, i) => (
                   <tr key={i}>
                     <td><code>{p.id}</code></td>
-                    <td>{p.diskPath}</td>
-                    <td>{p.partitionName}</td>
+                    <td>{p.path}</td>
+                    <td>{p.name}</td>
                     <td>
-                      <span className="status-badge mounted">Montada</span>
+                      <span className={`status-badge ${p.status === 'logged' ? 'logged' : 'mounted'}`}>
+                        {p.status === 'logged' ? 'Activa' : 'Montada'}
+                      </span>
                     </td>
                   </tr>
                 ))}

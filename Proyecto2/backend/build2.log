@@ -1,0 +1,3 @@
+make: se entra en el directorio '/home/alexl/Documentos/LAB ARCHIVOS/Proyecto2/backend'
+g++ -std=c++17 -Wall -Wextra -O0 -I../include -o server src/main.cpp -lpthread
+make: se sale del directorio '/home/alexl/Documentos/LAB ARCHIVOS/Proyecto2/backend'

@@ -1,0 +1,14 @@
+make: se entra en el directorio '/home/alexl/Documentos/LAB ARCHIVOS/Proyecto2/backend'
+g++ -std=c++17 -Wall -Wextra -O2 -I../include -o server src/main.cpp -lpthread
+En el fichero incluido desde src/main.cpp:12:
+src/file_manager.h: In function ‘bool addEntryToDir(FILE*, Superblock&, int, const std::string&, int)’:
+src/file_manager.h:209:20: aviso: ‘char* strncpy(char*, const char*, size_t)’ specified bound 12 equals destination size [-Wstringop-truncation]
+  209 |             strncpy(db.b_content[0].b_name, name.c_str(), 12);
+      |             ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/file_manager.h:193:16: aviso: ‘char* strncpy(char*, const char*, size_t)’ specified bound 12 equals destination size [-Wstringop-truncation]
+  193 |         strncpy(db.b_content[0].b_name, name.c_str(), 12);
+      |         ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/file_manager.h:163:20: aviso: ‘char* strncpy(char*, const char*, size_t)’ specified bound 12 equals destination size [-Wstringop-truncation]
+  163 |             strncpy(db.b_content[0].b_name, name.c_str(), 12);
+      |             ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+make: se sale del directorio '/home/alexl/Documentos/LAB ARCHIVOS/Proyecto2/backend'

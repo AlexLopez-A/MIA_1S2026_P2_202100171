@@ -1,0 +1,2 @@
+backend make && ./server
+frontend npm run dev

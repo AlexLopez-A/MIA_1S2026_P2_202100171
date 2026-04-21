@@ -1,0 +1,12 @@
+digraph DISK {
+  node [shape=plaintext];
+  disk [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">
+    <TR>
+      <TD BGCOLOR="#90CAF9"><B>MBR</B></TD>
+      <TD BGCOLOR="#81C784">part1<BR/>Primaria<BR/>5e+01% del disco</TD>
+      <TD BGCOLOR="#E0E0E0">Libre<BR/>5e+01% del disco</TD>
+    </TR>
+    </TABLE>
+  >];
+}

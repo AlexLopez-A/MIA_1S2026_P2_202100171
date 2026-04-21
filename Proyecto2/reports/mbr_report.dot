@@ -1,0 +1,19 @@
+digraph MBR {
+  node [shape=plaintext];
+  mbr [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">
+    <TR><TD COLSPAN="2" BGCOLOR="#4FC3F7"><B>MBR REPORT</B></TD></TR>
+    <TR><TD>mbr_tamano</TD><TD>52428800</TD></TR>
+    <TR><TD>mbr_fecha_creacion</TD><TD>09/03/2026 18:23:05</TD></TR>
+    <TR><TD>mbr_disk_signature</TD><TD>242404</TD></TR>
+    <TR><TD>mbr_disk_fit</TD><TD>F</TD></TR>
+    <TR><TD COLSPAN="2" BGCOLOR="#81C784"><B>Particion 1</B></TD></TR>
+    <TR><TD>part_status</TD><TD>1</TD></TR>
+    <TR><TD>part_type</TD><TD>P</TD></TR>
+    <TR><TD>part_fit</TD><TD>W</TD></TR>
+    <TR><TD>part_start</TD><TD>136</TD></TR>
+    <TR><TD>part_size</TD><TD>26214400</TD></TR>
+    <TR><TD>part_name</TD><TD>part1</TD></TR>
+    </TABLE>
+  >];
+}

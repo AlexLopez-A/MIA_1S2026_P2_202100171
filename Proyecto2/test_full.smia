@@ -1,0 +1,17 @@
+# Script de prueba completo
+mkdisk -size=50 -unit=M -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/discos/test.dsk"
+fdisk -size=25 -unit=M -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/discos/test.dsk" -name=part1 -type=P
+mount -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/discos/test.dsk" -name=part1
+mkfs -id=711A
+login -user=root -pass=123 -id=711A
+mkdir -r -path=/home/user/docs
+mkfile -r -path=/home/user/docs/hello.txt -size=50
+cat -file1=/home/user/docs/hello.txt
+# Reportes
+rep -id=711A -name=tree -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/reports/tree_report.png"
+rep -id=711A -name=sb -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/reports/sb_report.png"
+rep -id=711A -name=inode -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/reports/inode_report.png"
+rep -id=711A -name=block -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/reports/block_report.png"
+rep -id=711A -name=mbr -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/reports/mbr_report.png"
+rep -id=711A -name=disk -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/reports/disk_report.png"
+logout

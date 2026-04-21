@@ -1,0 +1,177 @@
+digraph Inodes {
+  rankdir=LR;
+  node [shape=plaintext];
+  inode0 [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">
+    <TR><TD COLSPAN="2" BGCOLOR="#4FC3F7"><B>Inode 0</B></TD></TR>
+    <TR><TD>i_uid</TD><TD>1</TD></TR>
+    <TR><TD>i_gid</TD><TD>1</TD></TR>
+    <TR><TD>i_size</TD><TD>0</TD></TR>
+    <TR><TD>i_atime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_ctime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_mtime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_type</TD><TD>Carpeta</TD></TR>
+    <TR><TD>i_perm</TD><TD>664</TD></TR>
+    <TR><TD>i_block[0]</TD><TD>0</TD></TR>
+    <TR><TD>i_block[1]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[2]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[3]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[4]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[5]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[6]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[7]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[8]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[9]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[10]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[11]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[12]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[13]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[14]</TD><TD>-1</TD></TR>
+    </TABLE>
+  >];
+  inode1 [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">
+    <TR><TD COLSPAN="2" BGCOLOR="#4FC3F7"><B>Inode 1</B></TD></TR>
+    <TR><TD>i_uid</TD><TD>1</TD></TR>
+    <TR><TD>i_gid</TD><TD>1</TD></TR>
+    <TR><TD>i_size</TD><TD>27</TD></TR>
+    <TR><TD>i_atime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_ctime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_mtime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_type</TD><TD>Archivo</TD></TR>
+    <TR><TD>i_perm</TD><TD>664</TD></TR>
+    <TR><TD>i_block[0]</TD><TD>1</TD></TR>
+    <TR><TD>i_block[1]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[2]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[3]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[4]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[5]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[6]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[7]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[8]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[9]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[10]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[11]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[12]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[13]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[14]</TD><TD>-1</TD></TR>
+    </TABLE>
+  >];
+  inode2 [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">
+    <TR><TD COLSPAN="2" BGCOLOR="#4FC3F7"><B>Inode 2</B></TD></TR>
+    <TR><TD>i_uid</TD><TD>1</TD></TR>
+    <TR><TD>i_gid</TD><TD>1</TD></TR>
+    <TR><TD>i_size</TD><TD>0</TD></TR>
+    <TR><TD>i_atime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_ctime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_mtime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_type</TD><TD>Carpeta</TD></TR>
+    <TR><TD>i_perm</TD><TD>664</TD></TR>
+    <TR><TD>i_block[0]</TD><TD>2</TD></TR>
+    <TR><TD>i_block[1]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[2]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[3]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[4]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[5]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[6]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[7]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[8]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[9]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[10]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[11]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[12]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[13]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[14]</TD><TD>-1</TD></TR>
+    </TABLE>
+  >];
+  inode3 [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">
+    <TR><TD COLSPAN="2" BGCOLOR="#4FC3F7"><B>Inode 3</B></TD></TR>
+    <TR><TD>i_uid</TD><TD>1</TD></TR>
+    <TR><TD>i_gid</TD><TD>1</TD></TR>
+    <TR><TD>i_size</TD><TD>0</TD></TR>
+    <TR><TD>i_atime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_ctime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_mtime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_type</TD><TD>Carpeta</TD></TR>
+    <TR><TD>i_perm</TD><TD>664</TD></TR>
+    <TR><TD>i_block[0]</TD><TD>3</TD></TR>
+    <TR><TD>i_block[1]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[2]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[3]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[4]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[5]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[6]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[7]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[8]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[9]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[10]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[11]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[12]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[13]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[14]</TD><TD>-1</TD></TR>
+    </TABLE>
+  >];
+  inode4 [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">
+    <TR><TD COLSPAN="2" BGCOLOR="#4FC3F7"><B>Inode 4</B></TD></TR>
+    <TR><TD>i_uid</TD><TD>1</TD></TR>
+    <TR><TD>i_gid</TD><TD>1</TD></TR>
+    <TR><TD>i_size</TD><TD>0</TD></TR>
+    <TR><TD>i_atime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_ctime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_mtime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_type</TD><TD>Carpeta</TD></TR>
+    <TR><TD>i_perm</TD><TD>664</TD></TR>
+    <TR><TD>i_block[0]</TD><TD>4</TD></TR>
+    <TR><TD>i_block[1]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[2]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[3]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[4]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[5]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[6]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[7]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[8]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[9]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[10]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[11]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[12]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[13]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[14]</TD><TD>-1</TD></TR>
+    </TABLE>
+  >];
+  inode5 [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">
+    <TR><TD COLSPAN="2" BGCOLOR="#4FC3F7"><B>Inode 5</B></TD></TR>
+    <TR><TD>i_uid</TD><TD>1</TD></TR>
+    <TR><TD>i_gid</TD><TD>1</TD></TR>
+    <TR><TD>i_size</TD><TD>50</TD></TR>
+    <TR><TD>i_atime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_ctime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_mtime</TD><TD>09/03/2026 18:23:06</TD></TR>
+    <TR><TD>i_type</TD><TD>Archivo</TD></TR>
+    <TR><TD>i_perm</TD><TD>664</TD></TR>
+    <TR><TD>i_block[0]</TD><TD>5</TD></TR>
+    <TR><TD>i_block[1]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[2]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[3]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[4]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[5]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[6]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[7]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[8]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[9]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[10]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[11]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[12]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[13]</TD><TD>-1</TD></TR>
+    <TR><TD>i_block[14]</TD><TD>-1</TD></TR>
+    </TABLE>
+  >];
+  inode0 -> inode1;
+  inode1 -> inode2;
+  inode2 -> inode3;
+  inode3 -> inode4;
+  inode4 -> inode5;
+}

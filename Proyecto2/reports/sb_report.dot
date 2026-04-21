@@ -1,0 +1,25 @@
+digraph SB {
+  node [shape=plaintext];
+  sb [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0">
+    <TR><TD COLSPAN="2" BGCOLOR="#CE93D8"><B>SUPERBLOCK REPORT</B></TD></TR>
+    <TR><TD>s_filesystem_type</TD><TD>2</TD></TR>
+    <TR><TD>s_inodes_count</TD><TD>85111</TD></TR>
+    <TR><TD>s_blocks_count</TD><TD>255333</TD></TR>
+    <TR><TD>s_free_inodes_count</TD><TD>85105</TD></TR>
+    <TR><TD>s_free_blocks_count</TD><TD>255327</TD></TR>
+    <TR><TD>s_mtime</TD><TD>09/03/2026 18:23:05</TD></TR>
+    <TR><TD>s_umtime</TD><TD>N/A</TD></TR>
+    <TR><TD>s_mnt_count</TD><TD>1</TD></TR>
+    <TR><TD>s_magic</TD><TD>0xef53</TD></TR>
+    <TR><TD>s_inode_size</TD><TD>112</TD></TR>
+    <TR><TD>s_block_size</TD><TD>64</TD></TR>
+    <TR><TD>s_first_ino</TD><TD>6</TD></TR>
+    <TR><TD>s_first_blo</TD><TD>6</TD></TR>
+    <TR><TD>s_bm_inode_start</TD><TD>216</TD></TR>
+    <TR><TD>s_bm_block_start</TD><TD>85327</TD></TR>
+    <TR><TD>s_inode_start</TD><TD>340660</TD></TR>
+    <TR><TD>s_block_start</TD><TD>9873092</TD></TR>
+    </TABLE>
+  >];
+}

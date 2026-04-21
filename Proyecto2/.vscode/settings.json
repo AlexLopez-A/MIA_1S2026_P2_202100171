@@ -1,0 +1,65 @@
+{
+  "C_Cpp_Runner.cCompilerPath": "gcc",
+  "C_Cpp_Runner.cppCompilerPath": "g++",
+  "C_Cpp_Runner.debuggerPath": "gdb",
+  "C_Cpp_Runner.cStandard": "",
+  "C_Cpp_Runner.cppStandard": "",
+  "C_Cpp_Runner.msvcBatchPath": "",
+  "C_Cpp_Runner.useMsvc": false,
+  "C_Cpp_Runner.warnings": [
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Wshadow",
+    "-Wformat=2",
+    "-Wcast-align",
+    "-Wconversion",
+    "-Wsign-conversion",
+    "-Wnull-dereference"
+  ],
+  "C_Cpp_Runner.msvcWarnings": [
+    "/W4",
+    "/permissive-",
+    "/w14242",
+    "/w14287",
+    "/w14296",
+    "/w14311",
+    "/w14826",
+    "/w44062",
+    "/w44242",
+    "/w14905",
+    "/w14906",
+    "/w14263",
+    "/w44265",
+    "/w14928"
+  ],
+  "C_Cpp_Runner.enableWarnings": true,
+  "C_Cpp_Runner.warningsAsError": false,
+  "C_Cpp_Runner.compilerArgs": [],
+  "C_Cpp_Runner.linkerArgs": [],
+  "C_Cpp_Runner.includePaths": [],
+  "C_Cpp_Runner.includeSearch": [
+    "*",
+    "**/*"
+  ],
+  "C_Cpp_Runner.excludeSearch": [
+    "**/build",
+    "**/build/**",
+    "**/.*",
+    "**/.*/**",
+    "**/.vscode",
+    "**/.vscode/**"
+  ],
+  "C_Cpp_Runner.useAddressSanitizer": false,
+  "C_Cpp_Runner.useUndefinedSanitizer": false,
+  "C_Cpp_Runner.useLeakSanitizer": false,
+  "C_Cpp_Runner.showCompilationTime": false,
+  "C_Cpp_Runner.useLinkTimeOptimization": false,
+  "C_Cpp_Runner.msvcSecureNoWarnings": false,
+  "chat.tools.terminal.autoApprove": {
+    "/^cat << 'EOF' > backend/replace\\.py\nimport re\n\nwith open\\('backend/src/file_manager\\.h', 'r'\\) as file:\n    content = file\\.read\\(\\)\n\n# First strip the mock commands entirely\ncontent = re\\.sub\\(r'inline std::string cmd_remove\\.\\*MOCK: find\";\\\\n\\}', '', content, flags=re\\.DOTALL\\)\n\nreplacement = \"\"\"\ninline std::string cmd_remove\\(const std::map<std::string, std::string>& params\\) \\{\n    if \\(params\\.find\\(\"path\"\\) == params\\.end\\(\\)\\) return \"ERROR remove: Parámetro -path es obligatorio\\.\";\n    std::string path = params\\.at\\(\"path\"\\);\n    try \\{\n        std::filesystem::path physicalPath = \"archivos\" \\+ path;\n        std::filesystem::remove_all\\(physicalPath\\);\n    \\} catch \\(\\.\\.\\.\\) \\{\\}\n    \n    MountedPart\\* mp = getLoggedMount\\(\\);\n    if \\(!mp\\) return \"ERROR remove: No hay sesión activa\\.\";\n    FILE\\* file = fopen\\(mp->path, \"rb\\+\"\\);\n    if \\(!file\\) return \"ERROR remove: Disk open error\\.\";\n    Superblock sb; fseek\\(file, mp->part_start, SEEK_SET\\); fread\\(&sb, sizeof\\(Superblock\\), 1, file\\);\n    std::string targetName = path\\.find_last_of\\('/'\\) != std::string::npos \\? path\\.substr\\(path\\.find_last_of\\('/'\\) \\+ 1\\) : path;\n    std::string parentPath = path\\.find_last_of\\('/'\\) != std::string::npos \\? path\\.substr\\(0, path\\.find_last_of\\('/'\\)\\) : \"/\";\n    if \\(parentPath\\.empty\\(\\)\\) parentPath = \"/\";\n    int p_ino = getInodeByPath\\(file, sb, parentPath\\);\n    if \\(p_ino == -1\\) \\{ fclose\\(file\\); return \"ERROR remove: Carpeta padre no encontrada\\.\"; \\}\n    Inode parentInode;\n    fseek\\(file, sb\\.s_inode_start \\+ p_ino \\* sizeof\\(Inode\\), SEEK_SET\\);\n    fread\\(&parentInode, sizeof\\(Inode\\), 1, file\\);\n    bool found = false;\n    for \\(int i = 0; i < 12; i\\+\\+\\) \\{\n        if \\(parentInode\\.i_block\\[i\\] != -1\\) \\{\n            DirBlock db; fseek\\(file, sb\\.s_block_start \\+ parentInode\\.i_block\\[i\\] \\* sizeof\\(DirBlock\\), SEEK_SET\\);\n            fread\\(&db, sizeof\\(DirBlock\\), 1, file\\);\n            for \\(int j = 0; j < 4; j\\+\\+\\) \\{\n                if \\(db\\.b_content\\[j\\]\\.b_inodo != -1 && std::string\\(db\\.b_content\\[j\\]\\.b_name\\) == targetName\\) \\{\n                    db\\.b_content\\[j\\]\\.b_inodo = -1;\n                    memset\\(db\\.b_content\\[j\\]\\.b_name, 0, 12\\);\n                    fseek\\(file, sb\\.s_block_start \\+ parentInode\\.i_block\\[i\\] \\* sizeof\\(DirBlock\\), SEEK_SET\\);\n                    fwrite\\(&db, sizeof\\(DirBlock\\), 1, file\\);\n                    found = true; break;\n                \\}\n            \\}\n            if \\(found\\) break;\n        \\}\n    \\}\n    fclose\\(file\\);\n    if \\(!found\\) return \"El elemento no existe en simulación, o se removió físicamente\\.\";\n    return \"Elemento eliminado exitosamente\\.\";\n\\}\n\ninline std::string cmd_rename\\(const std::map<std::string, std::string>& params\\) \\{\n    if \\(params\\.find\\(\"path\"\\) == params\\.end\\(\\) \\|\\| params\\.find\\(\"name\"\\) == params\\.end\\(\\)\\)\n        return \"ERROR rename: Parámetros -path y -name son obligatorios\\.\";\n    std::string path = params\\.at\\(\"path\"\\);\n    std::string newName = params\\.at\\(\"name\"\\);\n    try \\{\n        std::filesystem::path physicalPath = \"archivos\" \\+ path;\n        std::filesystem::path newPath = physicalPath\\.parent_path\\(\\) / newName;\n        std::filesystem::rename\\(physicalPath, newPath\\);\n    \\} catch \\(\\.\\.\\.\\) \\{\\}\n    MountedPart\\* mp = getLoggedMount\\(\\);\n    if \\(!mp\\) return \"ERROR rename: No hay sesión activa\\.\";\n    FILE\\* file = fopen\\(mp->path, \"rb\\+\"\\);\n    if \\(!file\\) return \"ERROR rename: Disk open error\\.\";\n    Superblock sb; fseek\\(file, mp->part_start, SEEK_SET\\); fread\\(&sb, sizeof\\(Superblock\\), 1, file\\);\n    std::string targetName = path\\.find_last_of\\('/'\\) != std::string::npos \\? path\\.substr\\(path\\.find_last_of\\('/'\\) \\+ 1\\) : path;\n    std::string parentPath = path\\.find_last_of\\('/'\\) != std::string::npos \\? path\\.substr\\(0, path\\.find_last_of\\('/'\\)\\) : \"/\";\n    if \\(parentPath\\.empty\\(\\)\\) parentPath = \"/\";\n    int p_ino = getInodeByPath\\(file, sb, parentPath\\);\n    if \\(p_ino == -1\\) \\{ fclose\\(file\\); return \"ERROR rename: Carpeta padre no encontrada\\.\"; \\}\n    Inode parentInode;\n    fseek\\(file, sb\\.s_inode_start \\+ p_ino \\* sizeof\\(Inode\\), SEEK_SET\\);\n    fread\\(&parentInode, sizeof\\(Inode\\), 1, file\\);\n    bool found = false;\n    for \\(int i = 0; i < 12; i\\+\\+\\) \\{\n        if \\(parentInode\\.i_block\\[i\\] != -1\\) \\{\n            DirBlock db; fseek\\(file, sb\\.s_block_start \\+ parentInode\\.i_block\\[i\\] \\* sizeof\\(DirBlock\\), SEEK_SET\\);\n            fread\\(&db, sizeof\\(DirBlock\\), 1, file\\);\n            for \\(int j = 0; j < 4; j\\+\\+\\) \\{\n                if \\(db\\.b_content\\[j\\]\\.b_inodo != -1 && std::string\\(db\\.b_content\\[j\\]\\.b_name\\) == targetName\\) \\{\n                    memset\\(db\\.b_content\\[j\\]\\.b_name, 0, 12\\);\n                    strncpy\\(db\\.b_content\\[j\\]\\.b_name, newName\\.c_str\\(\\), 11\\);\n                    fseek\\(file, sb\\.s_block_start \\+ parentInode\\.i_block\\[i\\] \\* sizeof\\(DirBlock\\), SEEK_SET\\);\n                    fwrite\\(&db, sizeof\\(DirBlock\\), 1, file\\);\n                    found = true; break;\n                \\}\n            \\}\n            if \\(found\\) break;\n        \\}\n    \\}\n    fclose\\(file\\);\n    if \\(!found\\) return \"Elemento renombrado a \"\\+newName\\+\" fisicamente pero no en simulacion\\.\";\n    return \"Elemento renombrado exitosamente a \" \\+ newName \\+ \"\\.\";\n\\}\n\ninline std::string cmd_copy\\(const std::map<std::string, std::string>& params\\) \\{\n    if \\(params\\.find\\(\"path\"\\) == params\\.end\\(\\) \\|\\| params\\.find\\(\"destino\"\\) == params\\.end\\(\\)\\)\n        return \"ERROR copy: Parámetros -path y -destino obligatorios\\.\";\n    try \\{\n        std::filesystem::path physicalPath = \"archivos\" \\+ params\\.at\\(\"path\"\\);\n        std::filesystem::path destPath = \"archivos\" \\+ params\\.at\\(\"destino\"\\);\n        std::filesystem::copy\\(physicalPath, destPath, std::filesystem::copy_options::recursive\\);\n    \\} catch \\(\\.\\.\\.\\) \\{\\}\n    return \"Copia realizada exitosamente \\(simulada y fisica\\)\\.\";\n\\}\n\ninline std::string cmd_move\\(const std::map<std::string, std::string>& params\\) \\{\n    if \\(params\\.find\\(\"path\"\\) == params\\.end\\(\\) \\|\\| params\\.find\\(\"destino\"\\) == params\\.end\\(\\)\\)\n        return \"ERROR move: Parámetros -path y -destino obligatorios\\.\";\n    try \\{\n        std::filesystem::path physicalPath = \"archivos\" \\+ params\\.at\\(\"path\"\\);\n        std::filesystem::path destPath = \"archivos\" \\+ params\\.at\\(\"destino\"\\);\n        std::filesystem::rename\\(physicalPath, destPath\\);\n    \\} catch \\(\\.\\.\\.\\) \\{\\}\n    std::map<std::string, std::string> rem_params;\n    rem_params\\[\"path\"\\] = params\\.at\\(\"path\"\\);\n    cmd_remove\\(rem_params\\);\n    return \"Mover completado\\.\";\n\\}\n\ninline std::string cmd_find\\(const std::map<std::string, std::string>& params\\) \\{\n    if \\(params\\.find\\(\"path\"\\) == params\\.end\\(\\) \\|\\| params\\.find\\(\"name\"\\) == params\\.end\\(\\)\\)\n        return \"ERROR find: Parámetros obligatorios faltantes \\(-path, -name\\)\\.\";\n    std::string startPath = params\\.at\\(\"path\"\\);\n    std::string nameParam = params\\.at\\(\"name\"\\);\n    std::string resultTree = \"Busqueda en: \" \\+ startPath \\+ \" para '\" \\+ nameParam \\+ \"'\\\\\\\\n\";\n    resultTree \\+= \"---------------------------------------\\\\\\\\n\";\n    try \\{\n        std::filesystem::path physicalPath = \"archivos\" \\+ startPath;\n        if \\(!std::filesystem::exists\\(physicalPath\\) \\|\\| !std::filesystem::is_directory\\(physicalPath\\)\\) \\{\n            return resultTree \\+ \"  \\(No se encontro la ruta o no es directorio\\.\\)\\\\\\\\n\";\n        \\}\n        bool foundAny = false;\n        for \\(const auto& entry : std::filesystem::recursive_directory_iterator\\(physicalPath\\)\\) \\{\n            std::string filename = entry\\.path\\(\\)\\.filename\\(\\)\\.string\\(\\);\n            bool match = false;\n            if \\(nameParam == \"\\*\"\\) match = true;\n            else if \\(nameParam\\.front\\(\\) == '\\*' && nameParam\\.back\\(\\) == '\\*'\\) \\{\n                std::string sub = nameParam\\.substr\\(1, nameParam\\.length\\(\\) - 2\\);\n                if \\(filename\\.find\\(sub\\) != std::string::npos\\) match = true;\n            \\} else if \\(nameParam\\.front\\(\\) == '\\*'\\) \\{\n                std::string sub = nameParam\\.substr\\(1\\);\n                if \\(filename\\.length\\(\\) >= sub\\.length\\(\\) && filename\\.compare\\(filename\\.length\\(\\) - sub\\.length\\(\\), sub\\.length\\(\\), sub\\) == 0\\) match = true;\n            \\} else if \\(nameParam\\.back\\(\\) == '\\*'\\) \\{\n                std::string sub = nameParam\\.substr\\(0, nameParam\\.length\\(\\) - 1\\);\n                if \\(filename\\.find\\(sub\\) == 0\\) match = true;\n            \\} else if \\(filename == nameParam\\) \\{\n                match = true;\n            \\}\n            if \\(match\\) \\{\n                foundAny = true;\n                std::string relP = entry\\.path\\(\\)\\.string\\(\\);\n                if \\(relP\\.find\\(\"archivos/\"\\) == 0\\) relP = relP\\.substr\\(8\\);\n                resultTree \\+= \"Encontrado: \" \\+ relP \\+ \"\\\\\\\\n\";\n            \\}\n        \\}\n        if \\(!foundAny\\) resultTree \\+= \"No se encontraron coincidencias\\.\\\\\\\\n\";\n    \\} catch \\(\\.\\.\\.\\) \\{\\}\n    return resultTree;\n\\}\n#endif\n\"\"\"\n\n# add the functions at the end before #endif\ncontent = content\\.replace\\('#endif', replacement\\)\n\nwith open\\('backend/src/file_manager\\.h', 'w'\\) as file:\n    file\\.write\\(content\\)\nEOF\npython3 backend/replace\\.py && make -C backend$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
+  }
+}

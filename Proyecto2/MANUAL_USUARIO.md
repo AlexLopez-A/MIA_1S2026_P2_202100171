@@ -96,14 +96,34 @@ npm run dev
 
 ![Ver particiones montadas](img/ver_particiones.png)
 
-## 12. Flujo recomendado de uso
+## 12. Explorador Visual e Inicio de Sesion
+Una vez que hayas creado tus discos, particiones y formateado el sistema, puedes usar la interfaz visual integrada en el frontend luego de iniciar sesion como usuario `root` (o cualquier otro usuario con permisos).
+
+### 1. Iniciar Sesion
+Al ejecutar el comando `login -user=root -pass=123 -id=...`, el estado de la particion cambia a logueada y se habilitan las vistas avanzadas de exploracion para ese montaje.
+![Iniciar Sesion](img/iniciarsesion.jpeg)
+
+### 2. Visualizar Discos
+Puedes acceder a la vista general de discos para consultar todos los archivos de disco `.mia` creados, ver sus tamaños y conocer cuántas particiones tienen.
+![Visualizar Discos](img/visualizardiscos.jpeg)
+
+### 3. Visualizar Particiones
+Dentro de la vista de un disco, puedes observar la estructura de particiones primarias, extendidas y lógicas, identificando cuáles están montadas y en cuál tienes una sesión activa.
+![Visualizar Particiones](img/visualizarparticion.jpeg)
+
+### 4. Explorador de Archivos y Carpetas
+Al tener la sesión iniciada en una partición, puedes navegar por su estructura de carpetas y archivos en forma de árbol, revisar propiedades, inodos y visualizar el contenido de los archivos directamente en la interfaz web.
+![Explorador](img/explorador.jpeg)
+
+## 13. Flujo recomendado de uso
 1. Levante backend y frontend.
 2. Cargue un script `.smia` o escriba comandos manualmente.
 3. Ejecute y revise la salida en consola.
 4. Consulte particiones montadas cuando aplique.
-5. Genere reportes y valide archivos en `reports/`.
+5. Inicie sesion para utilizar el explorador interactivo.
+6. Genere reportes y valide archivos en `reports/`.
 
-## 13. Comandos disponibles (titulo, ejemplo y para que es)
+## 14. Comandos disponibles (titulo, ejemplo y para que es)
 
 > Nota: todos los comandos se escriben en la seccion **Entrada de Comandos** del frontend. Los parametros pueden variar segun tu escenario.
 
@@ -267,7 +287,7 @@ rep -name=mbr -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/reports/mbr_r
 # Este bloque crea y monta un disco de prueba
 ```
 
-## 14. Resolucion de problemas comunes
+## 15. Resolucion de problemas comunes
 
 ### Problema 1: `make && ./sever` falla con codigo 127
 - Causa: el binario se llama `server`, no `sever`.
@@ -346,7 +366,7 @@ npm -v
   2. Confirme que el archivo existe en `reports/`.
   3. Reejecute `rep` con parametros correctos.
 
-## 15. Comandos base de arranque rapido
+## 16. Comandos base de arranque rapido
 ```bash
 # Terminal 1 - Backend
 cd backend

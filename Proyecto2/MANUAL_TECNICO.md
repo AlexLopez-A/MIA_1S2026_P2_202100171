@@ -414,7 +414,84 @@ mkfile -path="/home/proyectos/docs/nota.txt" -size=120 -r
 cat -file1="/home/proyectos/docs/nota.txt"
 ```
 
-## 6.5 Scripts y reportes
+### `remove`
+- Objetivo: eliminar un archivo o carpeta.
+- Parametros obligatorios: `-path`.
+- Requiere: sesion activa.
+- Efecto interno:
+  - Elimina las entradas de inodos y bloques.
+  - Actualiza el directorio padre.
+- Ejemplo:
+```txt
+remove -path="/home/proyectos/docs/nota.txt"
+```
+
+### `rename`
+- Objetivo: cambiar el nombre de un archivo o carpeta.
+- Parametros obligatorios: `-path`, `-name`.
+- Requiere: sesion activa.
+- Efecto interno: Modifica el nombre en la entrada del directorio padre.
+- Ejemplo:
+```txt
+rename -path="/home/proyectos/docs/nota.txt" -name="nueva_nota.txt"
+```
+
+### `copy`
+- Objetivo: copiar archivos o carpetas a otro destino.
+- Parametros obligatorios: `-path`, `-destino`.
+- Requiere: sesion activa.
+- Efecto interno: Duplica inodos y bloques recursivamente en el directorio destino.
+- Ejemplo:
+```txt
+copy -path="/home/proyectos/docs" -destino="/home/proyectos/backup"
+```
+
+### `move`
+- Objetivo: mover archivos o carpetas a otro destino.
+- Parametros obligatorios: `-path`, `-destino`.
+- Requiere: sesion activa.
+- Efecto interno: Actualiza la entrada del directorio original apuntando al nuevo destino.
+- Ejemplo:
+```txt
+move -path="/home/proyectos/docs/nota.txt" -destino="/home/proyectos/backup/"
+```
+
+### `find`
+- Objetivo: buscar archivos o carpetas por patron en su nombre.
+- Parametros:
+  - Obligatorio: `-path`, `-name`.
+- Requiere: sesion activa.
+- Efecto interno: Recorre recursivamente los inodos a partir de la ruta dada buscando coincidencias.
+- Ejemplo:
+```txt
+find -path="/home/" -name="*nota*"
+```
+
+## 6.5 Permisos y Propietarios
+
+### `chown`
+- Objetivo: cambiar el propietario de un archivo o carpeta.
+- Parametros obligatorios: `-path`, `-user`.
+- Opcional: `-r` (recursivo).
+- Requiere: sesion `root`.
+- Efecto interno: Actualiza el UID en el inodo asociado y opcionalmente en sus hijos.
+- Ejemplo:
+```txt
+chown -path="/home/nota.txt" -user="alex"
+```
+
+### `chmod`
+- Objetivo: cambiar los permisos de un archivo o carpeta.
+- Parametros obligatorios: `-path`, `-ugo`.
+- Opcional: `-r` (recursivo).
+- Requiere: sesion `root` o ser el propietario del archivo.
+- Efecto interno: Actualiza el campo de permisos en el inodo y opcionalmente en sus hijos.
+- Ejemplo:
+```txt
+chmod -path="/home/nota.txt" -ugo=777
+```
+
+## 6.6 Scripts y reportes
 
 ### `execute`
 - Objetivo: ejecutar comandos desde un archivo `.smia` del host.
@@ -438,6 +515,26 @@ execute -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/test_full.smia"
 - Ejemplo:
 ```txt
 rep -name=tree -path="/home/alexl/Documentos/LAB ARCHIVOS/Proyecto1/reports/tree_report.png" -id=711A
+```
+
+## 6.7 Recuperacion y Journaling
+
+### `loss`
+- Objetivo: simular la perdida de datos en el sistema de archivos (arruinar el disco).
+- Parametros obligatorios: `-id`.
+- Efecto interno: Escribe ceros en todos los bitmaps, inodos y bloques, simulando la corrupcion o perdida de la informacion almacenada.
+- Ejemplo:
+```txt
+loss -id=711A
+```
+
+### `journaling`
+- Objetivo: mostrar o gestionar el registro de operaciones (Journal) en un sistema de archivos EXT3.
+- Parametros obligatorios: `-id`.
+- Efecto interno: Lee las estructuras de Journaling de la particion montada y genera un reporte de texto con las transacciones realizadas.
+- Ejemplo:
+```txt
+journaling -id=711A
 ```
 
 ## 7. Integracion frontend-backend

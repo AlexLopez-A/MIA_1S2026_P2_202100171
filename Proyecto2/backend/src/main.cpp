@@ -639,7 +639,9 @@ int main() {
             return;
         }
 
-        std::filesystem::path root = std::filesystem::weakly_canonical(std::filesystem::path("archivos"));
+        std::string partFolder = "archivos/" + std::string(mp->id);
+        try { std::filesystem::create_directories(partFolder); } catch (...) {}
+        std::filesystem::path root = std::filesystem::weakly_canonical(std::filesystem::path(partFolder));
         if (!std::filesystem::exists(root)) {
             res.status = 500;
             res.set_content("{\"error\":\"Local explorer root not found\"}", "application/json");
@@ -697,7 +699,9 @@ int main() {
             return;
         }
 
-        std::filesystem::path root = std::filesystem::weakly_canonical(std::filesystem::path("archivos"));
+        std::string partFolder = "archivos/" + std::string(mp->id);
+        try { std::filesystem::create_directories(partFolder); } catch (...) {}
+        std::filesystem::path root = std::filesystem::weakly_canonical(std::filesystem::path(partFolder));
         if (!std::filesystem::exists(root)) {
             res.status = 500;
             res.set_content("{\"error\":\"Local explorer root not found\"}", "application/json");

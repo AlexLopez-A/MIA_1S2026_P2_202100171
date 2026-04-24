@@ -9,7 +9,7 @@ import type {
   MountedPartition,
 } from '../types';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://3.139.63.218:8080/api';
 
 export const executeCommand = async (command: string) => {
   const response = await axios.post<CommandResponse>(`${API_BASE_URL}/execute`, { command });
@@ -62,8 +62,15 @@ export const getJournalTable = async (id: string) => {
 };
 
 export const getReportContent = async (path: string) => {
-  const response = await axios.get(`${API_BASE_URL}/report`, { params: { path } });
-  return response.data;
+  const response = await axios.get<ArrayBuffer>(`${API_BASE_URL}/report`, {
+    params: { path },
+    responseType: 'arraybuffer',
+  });
+
+  return {
+    data: response.data,
+    contentType: response.headers['content-type'] || 'application/octet-stream',
+  };
 };
 
 export const getReportFile = getReportContent;

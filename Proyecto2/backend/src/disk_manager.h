@@ -4,6 +4,7 @@
 #include "structures.h"
 #include "parser.h"
 #include "utils.h"
+#include "mount_manager.h"
 #include <string>
 #include <cstdio>
 #include <cstring>
@@ -53,6 +54,13 @@ inline std::string cmd_mkdisk(const std::map<std::string, std::string>& params) 
 
     // Crear directorios padre
     createParentDirs(path);
+
+    // Eliminar particiones montadas previas para este disco
+    auto& mounted = getMountedList();
+    mounted.erase(std::remove_if(mounted.begin(), mounted.end(),
+        [&path](const MountedPart& m) { return std::string(m.path) == path; }),
+        mounted.end());
+    getDiskPartCount()[path] = 0;
 
     // Verificar si el archivo ya existe
     if (fileExists(path))

@@ -81,7 +81,7 @@ function App() {
             style={{padding: '6px 12px', cursor: 'pointer', background: showExplorer ? '#3b82f6' : '#1a1a1a', color: 'white', border: '1px solid #444', borderRadius: '4px'}}
             onClick={() => setShowExplorer(!showExplorer)}
          >
-            {showExplorer ? "Volver a Consola" : "Abrir Explorador Web (Visual)"}
+            {showExplorer ? "CERRAR SESION" : "INICIAR SESION"}
          </button>
       </div>
 

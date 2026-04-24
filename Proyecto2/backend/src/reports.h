@@ -39,7 +39,7 @@ inline bool renderDot(const std::string& dotContent, const std::string& outputPa
 // ==================== MBR Report ====================
 inline std::string reportMBR(const std::string& diskPath, const std::string& outputPath) {
     FILE* file = fopen(diskPath.c_str(), "rb");
-    if (!file) return "ERROR rep: No se pudo abrir el disco.";
+    if (!file) return "ERROR rep: No se pudo abrir el disco '" + diskPath + "'.";
 
     MBR mbr;
     fseek(file, 0, SEEK_SET);
@@ -172,7 +172,7 @@ inline std::string reportMBR(const std::string& diskPath, const std::string& out
 // ==================== DISK Report ====================
 inline std::string reportDISK(const std::string& diskPath, const std::string& outputPath) {
     FILE* file = fopen(diskPath.c_str(), "rb");
-    if (!file) return "ERROR rep: No se pudo abrir el disco.";
+    if (!file) return "ERROR rep: No se pudo abrir el disco '" + diskPath + "'.";
 
     MBR mbr;
     fseek(file, 0, SEEK_SET);
@@ -290,7 +290,7 @@ inline std::string reportDISK(const std::string& diskPath, const std::string& ou
 // ==================== Superblock Report ====================
 inline std::string reportSB(MountedPart* mp, const std::string& outputPath) {
     FILE* file = fopen(mp->path, "rb");
-    if (!file) return "ERROR rep: No se pudo abrir el disco.";
+    if (!file) return "ERROR rep: No se pudo abrir el disco '" + std::string(mp->path) + "'.";
 
     Superblock sb;
     fseek(file, mp->part_start, SEEK_SET);
@@ -331,7 +331,7 @@ inline std::string reportSB(MountedPart* mp, const std::string& outputPath) {
 // ==================== Inode Report ====================
 inline std::string reportInode(MountedPart* mp, const std::string& outputPath) {
     FILE* file = fopen(mp->path, "rb");
-    if (!file) return "ERROR rep: No se pudo abrir el disco.";
+    if (!file) return "ERROR rep: No se pudo abrir el disco '" + std::string(mp->path) + "'.";
 
     Superblock sb;
     fseek(file, mp->part_start, SEEK_SET);
@@ -389,7 +389,7 @@ inline std::string reportInode(MountedPart* mp, const std::string& outputPath) {
 // ==================== Block Report ====================
 inline std::string reportBlock(MountedPart* mp, const std::string& outputPath) {
     FILE* file = fopen(mp->path, "rb");
-    if (!file) return "ERROR rep: No se pudo abrir el disco.";
+    if (!file) return "ERROR rep: No se pudo abrir el disco '" + std::string(mp->path) + "'.";
 
     Superblock sb;
     fseek(file, mp->part_start, SEEK_SET);
@@ -513,7 +513,7 @@ inline std::string reportBlock(MountedPart* mp, const std::string& outputPath) {
 // ==================== Bitmap Inodes Report ====================
 inline std::string reportBMInode(MountedPart* mp, const std::string& outputPath) {
     FILE* file = fopen(mp->path, "rb");
-    if (!file) return "ERROR rep: No se pudo abrir el disco.";
+    if (!file) return "ERROR rep: No se pudo abrir el disco '" + std::string(mp->path) + "'.";
 
     Superblock sb;
     fseek(file, mp->part_start, SEEK_SET);
@@ -544,7 +544,7 @@ inline std::string reportBMInode(MountedPart* mp, const std::string& outputPath)
 // ==================== Bitmap Blocks Report ====================
 inline std::string reportBMBlock(MountedPart* mp, const std::string& outputPath) {
     FILE* file = fopen(mp->path, "rb");
-    if (!file) return "ERROR rep: No se pudo abrir el disco.";
+    if (!file) return "ERROR rep: No se pudo abrir el disco '" + std::string(mp->path) + "'.";
 
     Superblock sb;
     fseek(file, mp->part_start, SEEK_SET);
@@ -646,7 +646,7 @@ inline void buildTree(FILE* file, Superblock& sb, int inodeIdx, std::stringstrea
 
 inline std::string reportTree(MountedPart* mp, const std::string& outputPath) {
     FILE* file = fopen(mp->path, "rb");
-    if (!file) return "ERROR rep: No se pudo abrir el disco.";
+    if (!file) return "ERROR rep: No se pudo abrir el disco '" + std::string(mp->path) + "'.";
 
     Superblock sb;
     fseek(file, mp->part_start, SEEK_SET);
@@ -672,7 +672,7 @@ inline std::string reportTree(MountedPart* mp, const std::string& outputPath) {
 // ==================== Reporte de Archivo ====================
 inline std::string reportFile(MountedPart* mp, const std::string& outputPath, const std::string& filePath) {
     FILE* file = fopen(mp->path, "rb");
-    if (!file) return "ERROR rep: No se pudo abrir el disco.";
+    if (!file) return "ERROR rep: No se pudo abrir el disco '" + std::string(mp->path) + "'.";
 
     Superblock sb;
     fseek(file, mp->part_start, SEEK_SET);
@@ -772,7 +772,7 @@ inline void buildLSRows(FILE* file, Superblock& sb, int inodeIdx, const std::str
 
 inline std::string reportLS(MountedPart* mp, const std::string& outputPath, const std::string& dirPath) {
     FILE* file = fopen(mp->path, "rb");
-    if (!file) return "ERROR rep: No se pudo abrir el disco.";
+    if (!file) return "ERROR rep: No se pudo abrir el disco '" + std::string(mp->path) + "'.";
 
     Superblock sb;
     fseek(file, mp->part_start, SEEK_SET);

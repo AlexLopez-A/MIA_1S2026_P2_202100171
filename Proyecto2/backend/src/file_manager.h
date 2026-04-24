@@ -500,9 +500,13 @@ inline std::string cmd_mkdir(const std::map<std::string, std::string>& params) {
         recursive = true;
     }
 
+    MountedPart* mp = getLoggedMount();
+    if (!mp) return "ERROR mkdir: No hay sesión activa. Use 'login' primero.";
+
     // Crear la carpeta física
     try {
-        std::filesystem::path physicalPath = "archivos" + path;
+        std::string partFolder = "archivos/" + std::string(mp->id);
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
         if (recursive) {
             std::filesystem::create_directories(physicalPath);
         } else {
@@ -514,9 +518,6 @@ inline std::string cmd_mkdir(const std::map<std::string, std::string>& params) {
             return "ERROR mkdir (physical): " + std::string(e.what());
         }
     }
-
-    MountedPart* mp = getLoggedMount();
-    if (!mp) return "ERROR mkdir: No hay sesión activa. Use 'login' primero.";
 
     FILE* file = fopen(mp->path, "rb+");
     if (!file) return "ERROR mkdir: No se pudo abrir el disco.";
@@ -634,9 +635,13 @@ inline std::string cmd_mkfile(const std::map<std::string, std::string>& params) 
         }
     }
 
+    MountedPart* mp = getLoggedMount();
+    if (!mp) return "ERROR mkfile: No hay sesión activa. Use 'login' primero.";
+
     // Crear el archivo físico
     try {
-        std::filesystem::path physicalPath = "archivos" + path;
+        std::string partFolder = "archivos/" + std::string(mp->id);
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
         if (recursive) {
             if (physicalPath.has_parent_path()) {
                 std::filesystem::create_directories(physicalPath.parent_path());
@@ -651,9 +656,6 @@ inline std::string cmd_mkfile(const std::map<std::string, std::string>& params) 
     } catch (const std::filesystem::filesystem_error& e) {
         return "ERROR mkfile (physical): " + std::string(e.what());
     }
-
-    MountedPart* mp = getLoggedMount();
-    if (!mp) return "ERROR mkfile: No hay sesión activa. Use 'login' primero.";
 
     FILE* file = fopen(mp->path, "rb+");
     if (!file) return "ERROR mkfile: No se pudo abrir el disco.";
@@ -998,10 +1000,6 @@ inline std::string cmd_chmod(const std::map<std::string, std::string>& params) {
 inline std::string cmd_remove(const std::map<std::string, std::string>& params) {
     if (params.find("path") == params.end()) return "ERROR remove: Parámetro -path es obligatorio.";
     std::string path = params.at("path");
-    try {
-        std::filesystem::path physicalPath = "archivos" + path;
-        std::filesystem::remove_all(physicalPath);
-    } catch (...) {}
     
     MountedPart* mp = getLoggedMount();
     if (!mp) return "ERROR remove: No hay sesión activa.";
@@ -1022,12 +1020,15 @@ inline std::string cmd_remove(const std::map<std::string, std::string>& params) 
             DirBlock db; fseek(file, sb.s_block_start + parentInode.i_block[i] * sizeof(DirBlock), SEEK_SET);
             fread(&db, sizeof(DirBlock), 1, file);
             for (int j = 0; j < 4; j++) {
-                if (db.b_content[j].b_inodo != -1 && std::string(db.b_content[j].b_name) == targetName) {
-                    db.b_content[j].b_inodo = -1;
-                    memset(db.b_content[j].b_name, 0, 12);
-                    fseek(file, sb.s_block_start + parentInode.i_block[i] * sizeof(DirBlock), SEEK_SET);
-                    fwrite(&db, sizeof(DirBlock), 1, file);
-                    found = true; break;
+                if (db.b_content[j].b_inodo != -1) {
+                    std::string bname(db.b_content[j].b_name, strnlen(db.b_content[j].b_name, 12));
+                    if (bname == targetName) {
+                        db.b_content[j].b_inodo = -1;
+                        memset(db.b_content[j].b_name, 0, 12);
+                        fseek(file, sb.s_block_start + parentInode.i_block[i] * sizeof(DirBlock), SEEK_SET);
+                        fwrite(&db, sizeof(DirBlock), 1, file);
+                        found = true; break;
+                    }
                 }
             }
             if (found) break;
@@ -1035,6 +1036,12 @@ inline std::string cmd_remove(const std::map<std::string, std::string>& params) 
     }
     fclose(file);
     if (!found) return "El elemento no existe en simulación, o se removió físicamente.";
+
+    try {
+        std::string partFolder = mp ? "archivos/" + std::string(mp->id) : "archivos";
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
+        std::filesystem::remove_all(physicalPath);
+    } catch (...) {}
 
     if (params.find("__internal_move") == params.end()) {
         appendJournalEntry(mp, "remove", path, "-");
@@ -1048,11 +1055,7 @@ inline std::string cmd_rename(const std::map<std::string, std::string>& params) 
         return "ERROR rename: Parámetros -path y -name son obligatorios.";
     std::string path = params.at("path");
     std::string newName = params.at("name");
-    try {
-        std::filesystem::path physicalPath = "archivos" + path;
-        std::filesystem::path newPath = physicalPath.parent_path() / newName;
-        std::filesystem::rename(physicalPath, newPath);
-    } catch (...) {}
+    
     MountedPart* mp = getLoggedMount();
     if (!mp) return "ERROR rename: No hay sesión activa.";
     FILE* file = fopen(mp->path, "rb+");
@@ -1072,19 +1075,30 @@ inline std::string cmd_rename(const std::map<std::string, std::string>& params) 
             DirBlock db; fseek(file, sb.s_block_start + parentInode.i_block[i] * sizeof(DirBlock), SEEK_SET);
             fread(&db, sizeof(DirBlock), 1, file);
             for (int j = 0; j < 4; j++) {
-                if (db.b_content[j].b_inodo != -1 && std::string(db.b_content[j].b_name) == targetName) {
-                    memset(db.b_content[j].b_name, 0, 12);
-                    strncpy(db.b_content[j].b_name, newName.c_str(), 11);
-                    fseek(file, sb.s_block_start + parentInode.i_block[i] * sizeof(DirBlock), SEEK_SET);
-                    fwrite(&db, sizeof(DirBlock), 1, file);
-                    found = true; break;
+                if (db.b_content[j].b_inodo != -1) {
+                    std::string bname(db.b_content[j].b_name, strnlen(db.b_content[j].b_name, 12));
+                    if (bname == targetName) {
+                        memset(db.b_content[j].b_name, 0, 12);
+                        strncpy(db.b_content[j].b_name, newName.c_str(), 11);
+                        fseek(file, sb.s_block_start + parentInode.i_block[i] * sizeof(DirBlock), SEEK_SET);
+                        fwrite(&db, sizeof(DirBlock), 1, file);
+                        found = true; break;
+                    }
                 }
             }
             if (found) break;
         }
     }
     fclose(file);
-    if (!found) return "Elemento renombrado a "+newName+" fisicamente pero no en simulacion.";
+    if (!found) return "ERROR rename: File/Folder not found to rename.";
+
+    try {
+        std::string partFolder = mp ? "archivos/" + std::string(mp->id) : "archivos";
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (path.empty() ? "" : path.substr(1));
+        std::filesystem::path newPath = physicalPath.parent_path() / newName;
+        std::filesystem::rename(physicalPath, newPath);
+    } catch (...) {}
+
     appendJournalEntry(mp, "rename", path, newName);
     return "Elemento renombrado exitosamente a " + newName + ".";
 }
@@ -1093,8 +1107,12 @@ inline std::string cmd_copy(const std::map<std::string, std::string>& params) {
     if (params.find("path") == params.end() || params.find("destino") == params.end())
         return "ERROR copy: Parámetros -path y -destino obligatorios.";
     try {
-        std::filesystem::path physicalPath = "archivos" + params.at("path");
-        std::filesystem::path destPath = "archivos" + params.at("destino");
+        MountedPart* mp_phys = getLoggedMount();
+        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
+        std::string pathStr = params.at("path");
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (pathStr.empty() ? "" : pathStr.substr(1));
+        std::string destStr = params.at("destino");
+        std::filesystem::path destPath = std::filesystem::path(partFolder) / (destStr.empty() ? "" : destStr.substr(1));
         std::filesystem::copy(physicalPath, destPath, std::filesystem::copy_options::recursive);
     } catch (...) {}
 
@@ -1109,8 +1127,12 @@ inline std::string cmd_move(const std::map<std::string, std::string>& params) {
     if (params.find("path") == params.end() || params.find("destino") == params.end())
         return "ERROR move: Parámetros -path y -destino obligatorios.";
     try {
-        std::filesystem::path physicalPath = "archivos" + params.at("path");
-        std::filesystem::path destPath = "archivos" + params.at("destino");
+        MountedPart* mp_phys = getLoggedMount();
+        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
+        std::string pathStr = params.at("path");
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (pathStr.empty() ? "" : pathStr.substr(1));
+        std::string destStr = params.at("destino");
+        std::filesystem::path destPath = std::filesystem::path(partFolder) / (destStr.empty() ? "" : destStr.substr(1));
         std::filesystem::rename(physicalPath, destPath);
     } catch (...) {}
     std::map<std::string, std::string> rem_params;
@@ -1133,7 +1155,9 @@ inline std::string cmd_find(const std::map<std::string, std::string>& params) {
     std::string resultTree = "Busqueda en: " + startPath + " para '" + nameParam + "'\n";
     resultTree += "---------------------------------------\n";
     try {
-        std::filesystem::path physicalPath = "archivos" + startPath;
+        MountedPart* mp_phys = getLoggedMount();
+        std::string partFolder = mp_phys ? "archivos/" + std::string(mp_phys->id) : "archivos";
+        std::filesystem::path physicalPath = std::filesystem::path(partFolder) / (startPath.empty() ? "" : startPath.substr(1));
         if (!std::filesystem::exists(physicalPath) || !std::filesystem::is_directory(physicalPath)) {
             return resultTree + "  (No se encontro la ruta o no es directorio.)\n";
         }

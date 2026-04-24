@@ -1,0 +1,735 @@
+04:24:55 p. m.
+#
+#Calificacion Proyecto 2
+04:24:55 p. m.
+#
+#1S 2026
+04:24:55 p. m.
+#
+#Cambiar "alexl" -> por el usuario de su distribución de linux en aws
+04:24:55 p. m.
+#
+#Cambiar “71” -> en los ids por los ultimos dos digitos de su carnet
+04:24:55 p. m.
+#
+#******* TEORIA DE PARTICIONES *******
+04:24:55 p. m.
+#
+#CREANDO DISCO
+04:24:55 p. m.
+>
+Mkdisk -size=1 -unit=K -fit=FF -path=/home/alexl/Calificacion_MIA/Discos/Disco2.mia
+04:24:55 p. m.
+→
+Disco creado exitosamente en: /home/alexl/Calificacion_MIA/Discos/Disco2.mia (1024 bytes)
+04:24:55 p. m.
+✓
+Disco creado exitosamente en: /home/alexl/Calificacion_MIA/Discos/Disco2.mia (1024 bytes)
+04:24:55 p. m.
+#
+#CREACION DE PARTICIONES
+04:24:55 p. m.
+#
+#100
+04:24:55 p. m.
+>
+fdisk -type=P -unit=b -name=Part1 -size=100 -path=/home/alexl/Calificacion_MIA/Discos/Disco2.mia -fit=BF
+04:24:55 p. m.
+→
+Partición primaria 'Part1' creada exitosamente.
+04:24:55 p. m.
+✓
+Partición primaria 'Part1' creada exitosamente.
+04:24:55 p. m.
+#
+#100
+04:24:55 p. m.
+>
+fdisk -type=P -unit=b -name=Part2 -size=100 -path=/home/alexl/Calificacion_MIA/Discos/Disco2.mia -fit=BF
+04:24:56 p. m.
+→
+Partición primaria 'Part2' creada exitosamente.
+04:24:56 p. m.
+✓
+Partición primaria 'Part2' creada exitosamente.
+04:24:56 p. m.
+#
+#100
+04:24:56 p. m.
+>
+fdisk -type=P -unit=b -name=Part3 -size=100 -path=/home/alexl/Calificacion_MIA/Discos/Disco2.mia -fit=BF
+04:24:56 p. m.
+→
+Partición primaria 'Part3' creada exitosamente.
+04:24:56 p. m.
+✓
+Partición primaria 'Part3' creada exitosamente.
+04:24:56 p. m.
+#
+#559
+04:24:56 p. m.
+>
+fdisk -type=P -unit=b -name=Part4 -size=559 -path=/home/alexl/Calificacion_MIA/Discos/Disco2.mia -fit=BF
+04:24:56 p. m.
+✕
+ERROR fdisk: No hay espacio suficiente en el disco.
+04:24:56 p. m.
+→
+ERROR fdisk: No hay espacio suficiente en el disco.
+04:24:56 p. m.
+#
+#ELIMINANDO PARTICIONES
+04:24:56 p. m.
+>
+fdisk -delete=fast -name=Part1 -path=/home/alexl/Calificacion_MIA/Discos/Disco2.mia
+04:24:56 p. m.
+→
+Partición 'Part1' eliminada exitosamente (fast).
+04:24:56 p. m.
+✓
+Partición 'Part1' eliminada exitosamente (fast).
+04:24:56 p. m.
+>
+fdisk -delete=fast -name=Part3 -path=/home/alexl/Calificacion_MIA/Discos/Disco2.mia
+04:24:56 p. m.
+→
+Partición 'Part3' eliminada exitosamente (fast).
+04:24:56 p. m.
+✓
+Partición 'Part3' eliminada exitosamente (fast).
+04:24:56 p. m.
+#
+#QUITANDO ESPACIO
+04:24:56 p. m.
+>
+fdisk -add=-200 -size=10240 -unit=k -path=/home/alexl/Calificacion_MIA/Discos/Disco2.mia -name=Part4
+04:24:56 p. m.
+✕
+ERROR fdisk: No se encontró la partición 'Part4' para redimensionar.
+04:24:56 p. m.
+→
+ERROR fdisk: No se encontró la partición 'Part4' para redimensionar.
+04:24:56 p. m.
+#
+#CREACION DE PARTICIONES
+04:24:56 p. m.
+#
+#150
+04:24:56 p. m.
+>
+fdisk -type=P -unit=b -name=Part5 -size=100 -path=/home/alexl/Calificacion_MIA/Discos/Disco2.mia -fit=BF
+04:24:56 p. m.
+→
+Partición primaria 'Part5' creada exitosamente.
+04:24:56 p. m.
+✓
+Partición primaria 'Part5' creada exitosamente.
+04:24:56 p. m.
+#
+#100
+04:24:56 p. m.
+>
+fdisk -type=P -unit=b -name=Part6 -size=100 -path=/home/alexl/Calificacion_MIA/Discos/Disco2.mia -fit=BF
+04:24:56 p. m.
+→
+Partición primaria 'Part6' creada exitosamente.
+04:24:56 p. m.
+✓
+Partición primaria 'Part6' creada exitosamente.
+04:24:56 p. m.
+#
+#REPORTE
+04:24:56 p. m.
+>
+rep -id=711A -path=/home/alexl/Calificacion_MIA/Reportes/diskB.jpg -name=disk
+04:24:56 p. m.
+✕
+ERROR rep: No se pudo abrir el disco.
+04:24:56 p. m.
+→
+ERROR rep: No se pudo abrir el disco.
+04:24:56 p. m.
+>
+________________
+04:24:57 p. m.
+✕
+ERROR: Comando '________________' no reconocido.
+04:24:57 p. m.
+→
+ERROR: Comando '________________' no reconocido.
+04:24:57 p. m.
+#
+#------------ SISTEMAS DE ARCHIVOS COMPLETOS ---------------
+04:24:57 p. m.
+#
+#******* CREACION DE DISCO *******
+04:24:57 p. m.
+#
+# 60M A
+04:24:57 p. m.
+>
+Mkdisk -size=60 -unit=M -fit=FF -path=/home/alexl/Calificacion_MIA/Discos/Disco1.mia
+04:24:57 p. m.
+→
+Disco creado exitosamente en: /home/alexl/Calificacion_MIA/Discos/Disco1.mia (62914560 bytes)
+04:24:57 p. m.
+✓
+Disco creado exitosamente en: /home/alexl/Calificacion_MIA/Discos/Disco1.mia (62914560 bytes)
+04:24:57 p. m.
+#
+#******* CREACION DE PARTICIONES *******
+04:24:57 p. m.
+#
+#DISCO 1
+04:24:57 p. m.
+#
+# 20M
+04:24:57 p. m.
+>
+fdisk -type=P -unit=b -name=Part1 -size=20971520 -path=/home/alexl/Calificacion_MIA/Discos/Disco1.mia -fit=BF
+04:24:57 p. m.
+→
+Partición primaria 'Part1' creada exitosamente.
+04:24:57 p. m.
+✓
+Partición primaria 'Part1' creada exitosamente.
+04:24:57 p. m.
+#
+# 10M
+04:24:57 p. m.
+>
+fdisk -type=P -unit=k -name=Part2 -size=10240 -path=/home/alexl/Calificacion_MIA/Discos/Disco1.mia -fit=BF
+04:24:57 p. m.
+→
+Partición primaria 'Part2' creada exitosamente.
+04:24:57 p. m.
+✓
+Partición primaria 'Part2' creada exitosamente.
+04:24:57 p. m.
+#
+# 10M
+04:24:57 p. m.
+>
+fdisk -type=P -unit=M -name=Part3 -size=10 -path=/home/alexl/Calificacion_MIA/Discos/Disco1.mia -fit=BF
+04:24:58 p. m.
+→
+Partición primaria 'Part3' creada exitosamente.
+04:24:58 p. m.
+✓
+Partición primaria 'Part3' creada exitosamente.
+04:24:58 p. m.
+#
+# 10M
+04:24:58 p. m.
+>
+fdisk -type=P -unit=b -name=Part4 -size=10485760 -path=/home/alexl/Calificacion_MIA/Discos/Disco1.mia -fit=BF
+04:24:58 p. m.
+→
+Partición primaria 'Part4' creada exitosamente.
+04:24:58 p. m.
+✓
+Partición primaria 'Part4' creada exitosamente.
+04:24:58 p. m.
+#
+#ELIMINANDO PARTICIONES
+04:24:58 p. m.
+>
+fdisk -delete=fast -name=Part3 -path=/home/alexl/Calificacion_MIA/Discos/Disco1.mia
+04:24:58 p. m.
+→
+Partición 'Part3' eliminada exitosamente (fast).
+04:24:58 p. m.
+✓
+Partición 'Part3' eliminada exitosamente (fast).
+04:24:58 p. m.
+>
+fdisk -delete=fast -name=Part4 -path=/home/alexl/Calificacion_MIA/Discos/Disco1.mia
+04:24:58 p. m.
+→
+Partición 'Part4' eliminada exitosamente (fast).
+04:24:58 p. m.
+✓
+Partición 'Part4' eliminada exitosamente (fast).
+04:24:58 p. m.
+#
+#QUITANDO ESPACIO
+04:24:58 p. m.
+>
+fdisk -add=-500 -size=10240 -unit=k -path=/home/alexl/Calificacion_MIA/Discos/Disco1.mia -name=Part2
+04:24:58 p. m.
+→
+Partición 'Part2' reducida en 512000 bytes exitosamente.
+04:24:58 p. m.
+✓
+Partición 'Part2' reducida en 512000 bytes exitosamente.
+04:24:58 p. m.
+#
+#AGREGANDO ESPACIO
+04:24:58 p. m.
+>
+fdisk -add=500 -unit=k -path=/home/alexl/Calificacion_MIA/Discos/Disco1.mia -name=Part2
+04:24:59 p. m.
+→
+Partición 'Part2' ampliada en 512000 bytes exitosamente.
+04:24:59 p. m.
+✓
+Partición 'Part2' ampliada en 512000 bytes exitosamente.
+04:24:59 p. m.
+>
+rep -id=711A -path=/home/alexl/Calificacion_MIA/Reportes/diskB.jpg -name=disk
+04:24:59 p. m.
+✕
+ERROR rep: No se encontró la partición montada con ID '711A'.
+04:24:59 p. m.
+→
+ERROR rep: No se encontró la partición montada con ID '711A'.
+04:24:59 p. m.
+#
+#******* MONTAR PARTICIONES *******
+04:24:59 p. m.
+#
+#DISCO 1
+04:24:59 p. m.
+#
+#711a -> 71 sus ultimos dos digitos
+04:24:59 p. m.
+>
+mount -path=/home/alexl/Calificacion_MIA/Discos/Disco1.mia -name=Part1
+04:24:59 p. m.
+→
+Partición 'Part1' montada con ID: 711A
+04:24:59 p. m.
+✓
+Partición 'Part1' montada con ID: 711A
+04:24:59 p. m.
+#
+#712a -> 71 sus ultimos dos digitos
+04:24:59 p. m.
+>
+mount -path=/home/alexl/Calificacion_MIA/Discos/Disco1.mia -name=Part2
+04:24:59 p. m.
+→
+Partición 'Part2' montada con ID: 712A
+04:24:59 p. m.
+✓
+Partición 'Part2' montada con ID: 712A
+04:24:59 p. m.
+#
+#******* DESMONTAR PARTICION *******
+04:24:59 p. m.
+>
+unmount -id=712a
+04:24:59 p. m.
+→
+Partición 'Part2' desmontada exitosamente.
+04:24:59 p. m.
+✓
+Partición 'Part2' desmontada exitosamente.
+04:24:59 p. m.
+#
+#******* CREACION DE SISTEMA DE ARCHIVOS *******
+04:24:59 p. m.
+>
+mkfs -type=full -id=711a -fs=3fs
+04:25:01 p. m.
+→
+Sistema de archivos EXT3 creado exitosamente en partición 'Part1'. Inodos: 69883, Bloques: 209649
+04:25:01 p. m.
+✓
+Sistema de archivos EXT3 creado exitosamente en partición 'Part1'. Inodos: 69883, Bloques: 209649
+04:25:01 p. m.
+#
+#******* LOGIN *******
+04:25:01 p. m.
+>
+login -user=root -pass=123 -id=711a
+04:25:01 p. m.
+→
+Sesión iniciada como 'root'.
+04:25:01 p. m.
+✓
+Sesión iniciada como 'root'.
+04:25:01 p. m.
+#
+#******* CREACION DE CARPETAS *******
+04:25:01 p. m.
+#
+#RECURSIVO
+04:25:01 p. m.
+>
+mkdir -p -path=/calificacion/U2025/9noSemestre
+04:25:01 p. m.
+→
+Directorio '/calificacion/U2025/9noSemestre' creado exitosamente.
+04:25:01 p. m.
+✓
+Directorio '/calificacion/U2025/9noSemestre' creado exitosamente.
+04:25:01 p. m.
+>
+mkdir -p -path=/calificacion/U2025/6toSemestre/MIA
+04:25:02 p. m.
+→
+Directorio '/calificacion/U2025/6toSemestre/MIA' creado exitosamente.
+04:25:02 p. m.
+✓
+Directorio '/calificacion/U2025/6toSemestre/MIA' creado exitosamente.
+04:25:02 p. m.
+>
+mkfile -path=/calificacion/U2025/6toSemestre/MIA/lab.txt -size=5
+04:25:02 p. m.
+→
+Archivo '/calificacion/U2025/6toSemestre/MIA/lab.txt' creado exitosamente (5 bytes).
+04:25:02 p. m.
+✓
+Archivo '/calificacion/U2025/6toSemestre/MIA/lab.txt' creado exitosamente (5 bytes).
+04:25:02 p. m.
+>
+mkfile -path=/calificacion/U2025/6toSemestre/MIA/magis.txt -size=5
+04:25:02 p. m.
+→
+Archivo '/calificacion/U2025/6toSemestre/MIA/magis.txt' creado exitosamente (5 bytes).
+04:25:02 p. m.
+✓
+Archivo '/calificacion/U2025/6toSemestre/MIA/magis.txt' creado exitosamente (5 bytes).
+04:25:02 p. m.
+>
+mkdir -path=/calificacion/U2025/6toSemestre/ARQUI
+04:25:03 p. m.
+→
+Directorio '/calificacion/U2025/6toSemestre/ARQUI' creado exitosamente.
+04:25:03 p. m.
+✓
+Directorio '/calificacion/U2025/6toSemestre/ARQUI' creado exitosamente.
+04:25:03 p. m.
+>
+mkfile -path=/calificacion/U2025/6toSemestre/ARQUI/lab.txt -size=10
+04:25:03 p. m.
+→
+Archivo '/calificacion/U2025/6toSemestre/ARQUI/lab.txt' creado exitosamente (10 bytes).
+04:25:03 p. m.
+✓
+Archivo '/calificacion/U2025/6toSemestre/ARQUI/lab.txt' creado exitosamente (10 bytes).
+04:25:03 p. m.
+>
+mkfile -path=/calificacion/U2025/6toSemestre/ARQUI/magis.txt -size=10
+04:25:04 p. m.
+→
+Archivo '/calificacion/U2025/6toSemestre/ARQUI/magis.txt' creado exitosamente (10 bytes).
+04:25:04 p. m.
+✓
+Archivo '/calificacion/U2025/6toSemestre/ARQUI/magis.txt' creado exitosamente (10 bytes).
+04:25:04 p. m.
+>
+mkdir -path=/calificacion/U2025/6toSemestre/COMPI
+04:25:04 p. m.
+→
+Directorio '/calificacion/U2025/6toSemestre/COMPI' creado exitosamente.
+04:25:04 p. m.
+✓
+Directorio '/calificacion/U2025/6toSemestre/COMPI' creado exitosamente.
+04:25:04 p. m.
+>
+mkfile -path=/calificacion/U2025/6toSemestre/COMPI/lab.txt -size=30
+04:25:04 p. m.
+→
+Archivo '/calificacion/U2025/6toSemestre/COMPI/lab.txt' creado exitosamente (30 bytes).
+04:25:04 p. m.
+✓
+Archivo '/calificacion/U2025/6toSemestre/COMPI/lab.txt' creado exitosamente (30 bytes).
+04:25:04 p. m.
+>
+mkfile -path=/calificacion/U2025/6toSemestre/COMPI/magis.txt -size=30
+04:25:05 p. m.
+→
+Archivo '/calificacion/U2025/6toSemestre/COMPI/magis.txt' creado exitosamente (30 bytes).
+04:25:05 p. m.
+✓
+Archivo '/calificacion/U2025/6toSemestre/COMPI/magis.txt' creado exitosamente (30 bytes).
+04:25:05 p. m.
+>
+mkdir -path=/calificacion/TEST
+04:25:05 p. m.
+→
+Directorio '/calificacion/TEST' creado exitosamente.
+04:25:05 p. m.
+✓
+Directorio '/calificacion/TEST' creado exitosamente.
+04:25:05 p. m.
+>
+mkfile -path=/calificacion/TEST/carnet.txt -size=768
+04:25:06 p. m.
+→
+Archivo '/calificacion/TEST/carnet.txt' creado exitosamente (768 bytes).
+04:25:06 p. m.
+✓
+Archivo '/calificacion/TEST/carnet.txt' creado exitosamente (768 bytes).
+04:25:06 p. m.
+>
+mkfile -path=/calificacion/TEST/borrar.txt -size=768
+04:25:06 p. m.
+→
+Archivo '/calificacion/TEST/borrar.txt' creado exitosamente (768 bytes).
+04:25:06 p. m.
+✓
+Archivo '/calificacion/TEST/borrar.txt' creado exitosamente (768 bytes).
+04:25:06 p. m.
+>
+mkdir -path=/calificacion/TEST/BORRAME
+04:25:06 p. m.
+→
+Directorio '/calificacion/TEST/BORRAME' creado exitosamente.
+04:25:06 p. m.
+✓
+Directorio '/calificacion/TEST/BORRAME' creado exitosamente.
+04:25:06 p. m.
+>
+mkfile -path=/calificacion/TEST/cambiar_nombre.txt -size=768
+04:25:07 p. m.
+→
+Archivo '/calificacion/TEST/cambiar_nombre.txt' creado exitosamente (768 bytes).
+04:25:07 p. m.
+✓
+Archivo '/calificacion/TEST/cambiar_nombre.txt' creado exitosamente (768 bytes).
+04:25:07 p. m.
+>
+mkdir -path=/calificacion/COPY_TEST
+04:25:07 p. m.
+→
+Directorio '/calificacion/COPY_TEST' creado exitosamente.
+04:25:07 p. m.
+✓
+Directorio '/calificacion/COPY_TEST' creado exitosamente.
+04:25:07 p. m.
+>
+mkfile -path=/calificacion/COPY_TEST/moveme.txt -size=768
+04:25:07 p. m.
+→
+Archivo '/calificacion/COPY_TEST/moveme.txt' creado exitosamente (768 bytes).
+04:25:07 p. m.
+✓
+Archivo '/calificacion/COPY_TEST/moveme.txt' creado exitosamente (768 bytes).
+04:25:07 p. m.
+>
+mkfile -path=/calificacion/TEST/nombre.txt
+04:25:08 p. m.
+→
+Archivo '/calificacion/TEST/nombre.txt' creado exitosamente (0 bytes).
+04:25:08 p. m.
+✓
+Archivo '/calificacion/TEST/nombre.txt' creado exitosamente (0 bytes).
+04:25:08 p. m.
+>
+mkdir -path=/calificacion/MOVE
+04:25:08 p. m.
+→
+Directorio '/calificacion/MOVE' creado exitosamente.
+04:25:08 p. m.
+✓
+Directorio '/calificacion/MOVE' creado exitosamente.
+04:25:08 p. m.
+#
+#******* REMOVE *******
+04:25:08 p. m.
+#
+# Borrando archivo
+04:25:08 p. m.
+>
+remove -path=/calificacion/TEST/borrar.txt
+04:25:08 p. m.
+→
+Elemento eliminado exitosamente.
+04:25:08 p. m.
+✓
+Elemento eliminado exitosamente.
+04:25:08 p. m.
+#
+# Borrando carpeta
+04:25:08 p. m.
+>
+remove -path=/calificacion/TEST/BORRAME
+04:25:09 p. m.
+→
+Elemento eliminado exitosamente.
+04:25:09 p. m.
+✓
+Elemento eliminado exitosamente.
+04:25:09 p. m.
+#
+#******* RENAME *******
+04:25:09 p. m.
+>
+rename -path=/calificacion/TEST/cambiar_nombre.txt -name=cambiado.txt
+04:25:09 p. m.
+→
+Elemento renombrado a cambiado.txt fisicamente pero no en simulacion.
+04:25:09 p. m.
+✓
+Elemento renombrado a cambiado.txt fisicamente pero no en simulacion.
+04:25:09 p. m.
+#
+#******* COPY *******
+04:25:09 p. m.
+>
+copy -path=/calificacion/TEST -destino=/calificacion/COPY_TEST
+04:25:10 p. m.
+→
+Copia realizada exitosamente (simulada y fisica).
+04:25:10 p. m.
+✓
+Copia realizada exitosamente (simulada y fisica).
+04:25:10 p. m.
+#
+#******* MOVE *******
+04:25:10 p. m.
+>
+move -path=/calificacion/COPY_TEST/moveme.txt -destino=/calificacion/MOVE
+04:25:10 p. m.
+→
+Mover completado.
+04:25:10 p. m.
+✓
+Mover completado.
+04:25:10 p. m.
+#
+#******* FIND *******
+04:25:10 p. m.
+#
+# Archivos
+04:25:10 p. m.
+>
+find -path="/" -name="."
+04:25:10 p. m.
+→
+Busqueda en: / para '.'
+---------------------------------------
+No se encontraron coincidencias.
+04:25:10 p. m.
+✓
+Busqueda en: / para '.'
+---------------------------------------
+No se encontraron coincidencias.
+04:25:10 p. m.
+#
+#******* CHOWN *******
+04:25:10 p. m.
+#
+# Error no existe usuario
+04:25:10 p. m.
+>
+chown -path=/calificacion -usuario=user_no_existe
+04:25:11 p. m.
+✕
+ERROR chown: Usuario destino 'user_no_existe' no encontrado.
+04:25:11 p. m.
+→
+ERROR chown: Usuario destino 'user_no_existe' no encontrado.
+04:25:11 p. m.
+#
+#******* CHMOD *******
+04:25:11 p. m.
+>
+chmod -path=/calificacion/TEST -ugo=777
+04:25:11 p. m.
+→
+Permisos de '/calificacion/TEST' cambiados a 777 exitosamente.
+04:25:11 p. m.
+✓
+Permisos de '/calificacion/TEST' cambiados a 777 exitosamente.
+04:25:11 p. m.
+#
+#******* LOGOUT *******
+04:25:11 p. m.
+>
+logout
+04:25:12 p. m.
+→
+Sesión cerrada. Usuario 'root' desconectado.
+04:25:12 p. m.
+✓
+Sesión cerrada. Usuario 'root' desconectado.
+04:25:12 p. m.
+#
+#******* JOURNALING *******
+04:25:12 p. m.
+>
+journaling -id=711a
+04:25:12 p. m.
+→
+=== REPORTE JOURNALING ===
+Operación	Path			Contenido		Fecha
+---------	----			---------		-----
+mkfs	/Part1	fs=3fs	2026-04-23 16:25
+mkdir	/calificacion/U2025/9noSemestre	-p	2026-04-23 16:25
+mkdir	/calificacion/U2025/6toSemestre	-p	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	01234	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	01234	2026-04-23 16:25
+mkdir	/calificacion/U2025/6toSemestre	-	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	0123456789	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	0123456789	2026-04-23 16:25
+mkdir	/calificacion/U2025/6toSemestre	-	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	012345678901234567890123456789	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	012345678901234567890123456789	2026-04-23 16:25
+mkdir	/calificacion/TEST	-	2026-04-23 16:25
+mkfile	/calificacion/TEST/carnet.txt	012345678901234567890123456789012345678901234567890123456789012	2026-04-23 16:25
+mkfile	/calificacion/TEST/borrar.txt	012345678901234567890123456789012345678901234567890123456789012	2026-04-23 16:25
+mkdir	/calificacion/TEST/BORRAME	-	2026-04-23 16:25
+mkfile	/calificacion/TEST/cambiar_nomb	012345678901234567890123456789012345678901234567890123456789012	2026-04-23 16:25
+mkdir	/calificacion/COPY_TEST	-	2026-04-23 16:25
+mkfile	/calificacion/COPY_TEST/moveme.	012345678901234567890123456789012345678901234567890123456789012	2026-04-23 16:25
+mkfile	/calificacion/TEST/nombre.txt		2026-04-23 16:25
+mkdir	/calificacion/MOVE	-	2026-04-23 16:25
+remove	/calificacion/TEST/borrar.txt	-	2026-04-23 16:25
+remove	/calificacion/TEST/BORRAME	-	2026-04-23 16:25
+copy	/calificacion/TEST	/calificacion/COPY_TEST	2026-04-23 16:25
+move	/calificacion/COPY_TEST/moveme.	/calificacion/MOVE	2026-04-23 16:25
+chmod	/calificacion/TEST	777	2026-04-23 16:25
+Total de entradas: 25
+04:25:12 p. m.
+✓
+=== REPORTE JOURNALING ===
+Operación	Path			Contenido		Fecha
+---------	----			---------		-----
+mkfs	/Part1	fs=3fs	2026-04-23 16:25
+mkdir	/calificacion/U2025/9noSemestre	-p	2026-04-23 16:25
+mkdir	/calificacion/U2025/6toSemestre	-p	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	01234	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	01234	2026-04-23 16:25
+mkdir	/calificacion/U2025/6toSemestre	-	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	0123456789	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	0123456789	2026-04-23 16:25
+mkdir	/calificacion/U2025/6toSemestre	-	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	012345678901234567890123456789	2026-04-23 16:25
+mkfile	/calificacion/U2025/6toSemestre	012345678901234567890123456789	2026-04-23 16:25
+mkdir	/calificacion/TEST	-	2026-04-23 16:25
+mkfile	/calificacion/TEST/carnet.txt	012345678901234567890123456789012345678901234567890123456789012	2026-04-23 16:25
+mkfile	/calificacion/TEST/borrar.txt	012345678901234567890123456789012345678901234567890123456789012	2026-04-23 16:25
+mkdir	/calificacion/TEST/BORRAME	-	2026-04-23 16:25
+mkfile	/calificacion/TEST/cambiar_nomb	012345678901234567890123456789012345678901234567890123456789012	2026-04-23 16:25
+mkdir	/calificacion/COPY_TEST	-	2026-04-23 16:25
+mkfile	/calificacion/COPY_TEST/moveme.	012345678901234567890123456789012345678901234567890123456789012	2026-04-23 16:25
+mkfile	/calificacion/TEST/nombre.txt		2026-04-23 16:25
+mkdir	/calificacion/MOVE	-	2026-04-23 16:25
+remove	/calificacion/TEST/borrar.txt	-	2026-04-23 16:25
+remove	/calificacion/TEST/BORRAME	-	2026-04-23 16:25
+copy	/calificacion/TEST	/calificacion/COPY_TEST	2026-04-23 16:25
+move	/calificacion/COPY_TEST/moveme.	/calificacion/MOVE	2026-04-23 16:25
+chmod	/calificacion/TEST	777	2026-04-23 16:25
+Total de entradas: 25
+04:25:12 p. m.
+#
+#******* LOSS *******
+04:25:12 p. m.
+#
+#loss -id=711a
+04:25:12 p. m.
+#
+#******* LOGIN *******
+04:25:12 p. m.
+>
+login -user=root -pass=123 -id=711a
+04:25:13 p. m.
+→
+Sesión iniciada como 'root'.
+04:25:13 p. m.
+✓
+Sesión iniciada como 'root'.

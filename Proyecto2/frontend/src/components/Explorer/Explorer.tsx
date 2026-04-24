@@ -34,6 +34,7 @@ export default function Explorer() {
   const [isLogged, setIsLogged] = useState(false);
   const [visualLogged, setVisualLogged] = useState(false);
   const [currentView, setCurrentView] = useState<ExplorerView>('disks');
+  const [showJournaling, setShowJournaling] = useState(false);
   const [activePartitionId, setActivePartitionId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -136,6 +137,7 @@ export default function Explorer() {
   const handleSelectPartition = (partition: PartitionSummary) => {
     setSelectedPartition(partition);
     setSelectedFile(null);
+    setShowJournaling(false);
 
     if (!partition.mountId) {
       setActivePartitionId('');
@@ -160,11 +162,13 @@ export default function Explorer() {
     setSelectedFile(null);
     setJournalData(null);
     setError('');
+    setShowJournaling(false);
   };
 
   const handleBackToPartitions = () => {
     setCurrentView('partitions');
     setSelectedFile(null);
+    setShowJournaling(false);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -411,7 +415,9 @@ export default function Explorer() {
                     <span>{selectedFile.sizeHuman}</span>
                     <span>{selectedFile.permissions}</span>
                   </div>
-                  <pre className="file-content">{selectedFile.content}</pre>
+                  <div className="file-content-scroll">
+                    <pre className="file-content">{selectedFile.content}</pre>
+                  </div>
                 </>
               ) : (
                 <div className="empty-state">Seleccione un archivo existente para ver su contenido.</div>
@@ -419,39 +425,47 @@ export default function Explorer() {
             </section>
           </div>
 
-          <section className="journal-card">
-            <h3>Visor de Journaling</h3>
-            {!isLogged || !activePartitionId ? (
-              <div className="empty-state">Inicie sesión para visualizar journaling.</div>
-            ) : journalData?.entries.length ? (
-              <div className="journal-table-wrapper">
-                <table className="journal-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Operación</th>
-                      <th>Ruta</th>
-                      <th>Contenido</th>
-                      <th>Fecha</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {journalData.entries.map((entry) => (
-                      <tr key={`${entry.index}-${entry.date}`}>
-                        <td>{entry.index}</td>
-                        <td>{entry.operation}</td>
-                        <td>{entry.path}</td>
-                        <td>{entry.content}</td>
-                        <td>{entry.date}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="empty-state">{journalData?.message || 'Sin entradas de journaling para esta partición.'}</div>
-            )}
+          <section className="journal-toggle-bar">
+            <button className="nav-btn" onClick={() => setShowJournaling((prev) => !prev)}>
+              {showJournaling ? 'Ocultar Journaling' : 'Ver Journaling'}
+            </button>
           </section>
+
+          {showJournaling && (
+            <section className="journal-card">
+              <h3>Visor de Journaling</h3>
+              {!isLogged || !activePartitionId ? (
+                <div className="empty-state">Inicie sesión para visualizar journaling.</div>
+              ) : journalData?.entries.length ? (
+                <div className="journal-table-wrapper">
+                  <table className="journal-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Operación</th>
+                        <th>Ruta</th>
+                        <th>Contenido</th>
+                        <th>Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {journalData.entries.map((entry) => (
+                        <tr key={`${entry.index}-${entry.date}`}>
+                          <td>{entry.index}</td>
+                          <td>{entry.operation}</td>
+                          <td>{entry.path}</td>
+                          <td>{entry.content}</td>
+                          <td>{entry.date}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="empty-state">{journalData?.message || 'Sin entradas de journaling para esta partición.'}</div>
+              )}
+            </section>
+          )}
         </section>
       )}
     </div>
